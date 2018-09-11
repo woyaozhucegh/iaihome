@@ -1,0 +1,60 @@
+@import url(portal/aui_deprecated.css);
+
+@import "portal";
+@import "taglib";
+
+@import "portal/accessibility";
+
+.lfr-asset-category-list {
+	ul {
+		list-style: none;
+		margin-top: 4px;
+		padding: 0;	
+	}
+
+	li {
+		list-style-type: none;
+		margin: 0;
+		padding: 7px 0 7px 0px;
+		font-size: 0.875rem;
+	}
+
+	span {
+		padding-left: 3px;
+	}
+}
+
+
+.panel-title.h4 {
+    font-size: 0.875rem;
+    padding: 6px 0 6px 10px;
+    border-bottom: 3px solid #da1414;
+    background-color: #d4d4d4;
+}
+
+.tree-node-leaf {
+    margin-left: 5px;
+}
+
+.display-style-icon .lfr-asset-item {
+    width: 25%;
+}
+
+.dropdown-subheader {
+    background-color: #6b6c7e;
+    color: rgb(255, 255, 255);
+}
+
+.lfr-card-modified-by-text .icon-monospaced{
+	color: rgba(0, 0, 0, 0.5);
+	font-size: 0.87em;
+}
+
+.lfr-card-title-text {
+    text-align: center;
+}
+
+.portlet-document-library .taglib-ratings.stars, .portlet-document-library-display .taglib-ratings.stars, .portlet-trash .taglib-ratings.stars {
+    font-size: 0.9em;
+    color: rgb(127, 127, 127);
+}
