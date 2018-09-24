@@ -30,6 +30,47 @@ if (!fileVersion.isApproved() && !fileVersion.getVersion().equals(DLFileEntryCon
 else {
 	assetClassPK = fileEntry.getFileEntryId();
 }
+
+//get the group logo--------------------Tiamo--------------------------------------------
+long fileEntryTypeId = ParamUtil.getLong(request, "fileEntryTypeId", -1);
+
+long groupId = fileEntry.getGroupId();
+Group group = GroupLocalServiceUtil.getGroup(groupId);
+String groupname = group.getName();
+boolean isPrivatePages = false;
+
+long logoId = 0;
+String layoutSetLogoUrl = null;
+LayoutSet brandLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(groupId, isPrivatePages);
+if (brandLayoutSet.isLogo()) {
+  logoId = brandLayoutSet.getLogoId();
+}
+StringBundler sb = new StringBundler(5);
+
+sb.append(PortalUtil.getPathImage());
+sb.append("/layout_set_logo?img_id=");
+sb.append(logoId);
+sb.append("&t=");
+sb.append(WebServerServletTokenUtil.getToken(logoId));
+layoutSetLogoUrl = sb.toString();
+
+
+AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.fetchEntry(DLFileEntryConstants.getClassName(), assetClassPK);
+
+//get the fileEntryType
+
+if (fileVersion.getModel() instanceof DLFileVersion) {
+	DLFileVersion dlFileVersion = (DLFileVersion)fileVersion.getModel();
+
+	fileEntryTypeId = dlFileVersion.getFileEntryTypeId();
+}
+
+DLFileEntryType dlFileEntryType = null;
+String dlFileEntrytypeName = "base documents";
+if (fileEntryTypeId > 0) {
+	dlFileEntryType = DLFileEntryTypeLocalServiceUtil.getFileEntryType(fileEntryTypeId);
+	dlFileEntrytypeName = dlFileEntryType.getName(locale);
+}
 %>
 
 <div class="sidebar-header">
@@ -39,7 +80,6 @@ else {
 		</li>
 	</ul>
 
-	<h4><%= HtmlUtil.escape(fileEntry.getTitle()) %></h4>
 
 	<c:if test="<%= dlViewFileVersionDisplayContext.isVersionInfoVisible() %>">
 		<clay:label
@@ -74,11 +114,11 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 			String thumbnailSrc = DLUtil.getThumbnailSrc(fileEntry, fileVersion, themeDisplay);
 			%>
 
-			<c:if test="<%= Validator.isNotNull(thumbnailSrc) %>">
-				<div class="aspect-ratio aspect-ratio-16-to-9 sidebar-panel thumbnail">
-					<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="thumbnail" />" class="aspect-ratio-item-center-middle aspect-ratio-item-fluid" src="<%= DLUtil.getThumbnailSrc(fileEntry, fileVersion, themeDisplay) %>" />
-				</div>
-			</c:if>
+			<div class="aspect-ratio aspect-ratio-16-to-9 sidebar-panel thumbnail">
+				<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="thumbnail" />" class="aspect-ratio-item-center-middle aspect-ratio-item-fluid" src="<%= layoutSetLogoUrl %>" />
+				<span style="display:block; margin: 8px; color: rgba(0, 0, 0, 0.5);font-size: 0.87em;"><%= LanguageUtil.format(request, "x-ago-by-x", new String[] {LanguageUtil.getTimeDescription(locale, System.currentTimeMillis() - fileVersion.getCreateDate().getTime(), true), groupname}, false) %></span>
+			</div>
+
 
 			<div class="autofit-row sidebar-panel widget-metadata">
 				<div class="autofit-col inline-item-before">
@@ -114,89 +154,6 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 				</div>
 			</div>
 
-			<c:if test="<%= dlViewFileVersionDisplayContext.isDownloadLinkVisible() %>">
-				<div class="sidebar-section">
-					<div class="btn-group sidebar-panel">
-						<div class="btn-group-item">
-							<clay:link
-								buttonStyle="primary"
-								elementClasses='<%= "btn-sm" %>'
-								href="<%= DLUtil.getDownloadURL(fileEntry, fileVersion, themeDisplay, StringPool.BLANK) %>"
-								label='<%= LanguageUtil.get(resourceBundle, "download") %>'
-								title='<%= LanguageUtil.get(resourceBundle, "download") + " (" + TextFormatter.formatStorageSize(fileVersion.getSize(), locale) + ")" %>'
-							/>
-						</div>
-
-						<c:if test="<%= PropsValues.DL_FILE_ENTRY_CONVERSIONS_ENABLED && DocumentConversionUtil.isEnabled() %>">
-
-							<%
-							final String[] conversions = DocumentConversionUtil.getConversions(fileVersion.getExtension());
-							%>
-
-							<c:if test="<%= conversions.length > 0 %>">
-								<div class="btn-group-item">
-									<div class="d-inline-block">
-										<clay:dropdown-menu
-											dropdownItems="<%=
-												new JSPDropdownItemList(pageContext) {
-													{
-														ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(WebKeys.THEME_DISPLAY);
-
-														for (String conversion : conversions) {
-															add(
-																dropdownItem -> {
-																	dropdownItem.setHref(DLUtil.getDownloadURL(fileEntry, fileVersion, themeDisplay, "&targetExtension=" + conversion));
-																	dropdownItem.setLabel(StringUtil.toUpperCase(conversion));
-																});
-														}
-													}
-												}
-											%>"
-											style="secondary"
-											triggerCssClasses="btn-outline-borderless btn-sm"
-											label="<%= LanguageUtil.get(request, "download-as") %>"
-										/>
-									</div>
-								</div>
-							</c:if>
-						</c:if>
-					</div>
-
-					<div class="sidebar-panel">
-
-						<%
-						boolean isLatestVersion = fileVersion.equals(fileEntry.getLatestFileVersion());
-
-						String urlLabel = null;
-
-						if (isLatestVersion) {
-							urlLabel = LanguageUtil.get(resourceBundle, "latest-version-url");
-						}
-						else {
-							urlLabel = LanguageUtil.format(request, "version-x-url", fileVersion.getVersion());
-						}
-						%>
-
-						<aui:input label="<%= urlLabel %>" name="url" type="resource" value="<%= DLUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, StringPool.BLANK, !isLatestVersion, true) %>" />
-
-						<c:if test="<%= portletDisplay.isWebDAVEnabled() && fileEntry.isSupportsSocial() && isLatestVersion %>">
-
-							<%
-							String webDavHelpMessage = null;
-
-							if (BrowserSnifferUtil.isWindows(request)) {
-								webDavHelpMessage = LanguageUtil.format(request, "webdav-windows-help", new Object[] {"https://support.microsoft.com/en-us/kb/892211", "https://dev.liferay.com/discover/portal/-/knowledge_base/7-0/publishing-files#desktop-access-to-documents-and-media"}, false);
-							}
-							else {
-								webDavHelpMessage = LanguageUtil.format(request, "webdav-help", "https://dev.liferay.com/discover/portal/-/knowledge_base/7-0/publishing-files#desktop-access-to-documents-and-media", false);
-							}
-							%>
-
-							<aui:input helpMessage="<%= webDavHelpMessage %>" name="webDavURL" type="resource" value="<%= DLUtil.getWebDavURL(themeDisplay, fileEntry.getFolder(), fileEntry) %>" />
-						</c:if>
-					</div>
-				</div>
-			</c:if>
 
 			<dl class="sidebar-dl sidebar-section">
 				<c:if test="<%= fileVersion.getModel() instanceof DLFileVersion %>">
@@ -204,7 +161,7 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 					<%
 					DLFileVersion dlFileVersion = (DLFileVersion)fileVersion.getModel();
 
-					DLFileEntryType dlFileEntryType = dlFileVersion.getDLFileEntryType();
+					dlFileEntryType = dlFileVersion.getDLFileEntryType();
 					%>
 
 					<dt class="sidebar-dt">
@@ -212,71 +169,6 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 					</dt>
 					<dd class="sidebar-dd">
 						<%= HtmlUtil.escape(dlFileEntryType.getName(locale)) %>
-					</dd>
-				</c:if>
-
-				<c:if test="<%= Validator.isNotNull(fileVersion.getExtension()) %>">
-					<dt class="sidebar-dt">
-						<liferay-ui:message key="extension" />
-					</dt>
-					<dd class="sidebar-dd">
-						<%= HtmlUtil.escape(fileVersion.getExtension()) %>
-					</dd>
-				</c:if>
-
-				<dt class="sidebar-dt">
-					<liferay-ui:message key="size" />
-				</dt>
-				<dd class="sidebar-dd">
-					<%= HtmlUtil.escape(TextFormatter.formatStorageSize(fileEntry.getSize(), locale)) %>
-				</dd>
-				<dt class="sidebar-dt">
-					<liferay-ui:message key="modified" />
-				</dt>
-				<dd class="sidebar-dd">
-					<liferay-ui:message arguments="<%= new Object[] {dateFormatDateTime.format(fileVersion.getModifiedDate()), HtmlUtil.escape(fileVersion.getStatusByUserName())} %>" key="x-by-x" translateArguments="<%= false %>" />
-				</dd>
-				<dt class="sidebar-dt">
-					<liferay-ui:message key="created" />
-				</dt>
-				<dd class="sidebar-dd">
-					<liferay-ui:message arguments="<%= new Object[] {dateFormatDateTime.format(fileVersion.getCreateDate()), HtmlUtil.escape(fileVersion.getUserName())} %>" key="x-by-x" translateArguments="<%= false %>" />
-				</dd>
-
-				<liferay-asset:asset-tags-available
-					className="<%= DLFileEntryConstants.getClassName() %>"
-					classPK="<%= assetClassPK %>"
-				>
-					<dt class="sidebar-dt">
-						<liferay-ui:message key="tags" />
-					</dt>
-					<dd class="sidebar-dd">
-						<liferay-asset:asset-tags-summary
-							className="<%= DLFileEntryConstants.getClassName() %>"
-							classPK="<%= assetClassPK %>"
-						/>
-					</dd>
-				</liferay-asset:asset-tags-available>
-
-				<c:if test="<%= dlPortletInstanceSettings.isEnableRatings() && fileEntry.isSupportsSocial() %>">
-					<dt class="sidebar-dt">
-						<liferay-ui:message key="ratings" />
-					</dt>
-					<dd class="sidebar-dd">
-						<liferay-ui:ratings
-							className="<%= DLFileEntryConstants.getClassName() %>"
-							classPK="<%= fileEntry.getFileEntryId() %>"
-							inTrash="<%= fileEntry.isInTrash() %>"
-						/>
-					</dd>
-				</c:if>
-
-				<c:if test="<%= Validator.isNotNull(fileEntry.getDescription()) %>">
-					<dt class="sidebar-dt">
-						<liferay-ui:message key="description" />
-					</dt>
-					<dd class="sidebar-dd">
-						<%= HtmlUtil.escape(fileEntry.getDescription()) %>
 					</dd>
 				</c:if>
 
@@ -295,11 +187,33 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 						/>
 					</dd>
 				</liferay-asset:asset-categories-available>
+				
+				<liferay-asset:asset-tags-available
+					className="<%= DLFileEntryConstants.getClassName() %>"
+					classPK="<%= assetClassPK %>"
+				>
+					<dt class="sidebar-dt">
+						<liferay-ui:message key="tags" />
+					</dt>
+					<dd class="sidebar-dd">
+						<liferay-asset:asset-tags-summary
+							className="<%= DLFileEntryConstants.getClassName() %>"
+							classPK="<%= assetClassPK %>"
+						/>
+					</dd>
+				</liferay-asset:asset-tags-available>
+
+				<c:if test="<%= Validator.isNotNull(fileEntry.getDescription()) %>">
+					<dt class="sidebar-dt">
+						<liferay-ui:message key="description" />
+					</dt>
+					<dd class="sidebar-dd">
+						<%= HtmlUtil.escape(fileEntry.getDescription()) %>
+					</dd>
+				</c:if>
+
 			</dl>
 
-			<%
-			AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.fetchEntry(DLFileEntryConstants.getClassName(), assetClassPK);
-			%>
 
 			<c:if test="<%= (layoutAssetEntry != null) && dlPortletInstanceSettings.isEnableRelatedAssets() && fileEntry.isSupportsSocial() %>">
 				<liferay-asset:asset-links
@@ -451,4 +365,5 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 			</div>
 		</liferay-ui:section>
 	</c:if>
+
 </liferay-ui:tabs>

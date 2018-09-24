@@ -37,6 +37,7 @@ page import="com.liferay.portal.kernel.search.SortFactoryUtil" %><%@
 page import="java.io.Serializable" %><%@
 page import="com.liferay.document.library.kernel.model.DLFileShortcut" %><%@
 page import="com.liferay.document.library.kernel.service.DLFileShortcutLocalServiceUtil" %><%@
+page import="com.liferay.document.library.kernel.model.DLFileEntryType" %><%@
 page import="com.liferay.portal.kernel.exception.PortalException" %><%@
 page import="com.liferay.portal.kernel.exception.SystemException" %><%@
 page import="com.liferay.portal.kernel.model.LayoutSet" %><%@
@@ -45,3 +46,5 @@ page import="com.liferay.asset.kernel.model.AssetEntry" %><%@
 page import="com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil" %><%@
 page import="com.liferay.portal.kernel.util.StringBundler" %><%@
 page import="com.liferay.portal.kernel.webserver.WebServerServletTokenUtil" %>
+
+

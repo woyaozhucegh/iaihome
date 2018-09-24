@@ -14,7 +14,7 @@
  */
 --%>
 
-<%@ include file="/document_library/init.jsp" %>
+<%@ include file="/products_data_display/init.jsp" %>
 
 <liferay-util:dynamic-include key="com.liferay.document.library.web#/document_library/view_file_entry.jsp#pre" />
 
@@ -146,7 +146,7 @@ if (portletTitleBasedNavigation) {
 		request.setAttribute("info_panel.jsp-fileVersion", fileVersion);
 		%>
 
-		<liferay-util:include page="/document_library/info_panel_file_entry.jsp" servletContext="<%= application %>" />
+		<liferay-util:include page="/products_data_display/info_panel_file_entry.jsp" servletContext="<%= application %>" />
 	</liferay-frontend:sidebar-panel>
 
 	<div class="sidenav-content">

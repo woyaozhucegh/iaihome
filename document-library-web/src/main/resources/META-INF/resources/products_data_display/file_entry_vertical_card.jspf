@@ -118,6 +118,3 @@ if (fileEntryTypeId > 0) {
 	</c:if>			
 	<span style="display:block; margin: 8px; color: rgba(0, 0, 0, 0.5);font-size: 0.87em;"><%= LanguageUtil.format(request, "x-ago-by-x", new String[] {LanguageUtil.getTimeDescription(locale, System.currentTimeMillis() - latestFileVersion.getCreateDate().getTime(), true), groupname}, false) %></span>
 </liferay-frontend:vertical-card-footer>
-<%
-System.out.println("DLFileEntryConstants.getClassName()=========="+DLFileEntryConstants.getClassName());
-%>
