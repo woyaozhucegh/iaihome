@@ -34,22 +34,33 @@ import com.liferay.document.library.kernel.exception.NoSuchFolderException;
 import com.liferay.document.library.kernel.exception.RequiredFileException;
 import com.liferay.document.library.kernel.exception.SourceFileNameException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppService;
+import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLTrashService;
 import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.document.library.kernel.util.DLValidator;
 import com.liferay.document.library.web.internal.constants.DLWebKeys;
 import com.liferay.document.library.web.internal.settings.DLPortletInstanceSettings;
 import com.liferay.dynamic.data.mapping.kernel.StorageFieldRequiredException;
+import com.liferay.expando.kernel.model.ExpandoTable;
+import com.liferay.expando.kernel.service.ExpandoRowLocalServiceUtil;
+import com.liferay.expando.kernel.service.ExpandoTableLocalServiceUtil;
+import com.liferay.expando.kernel.service.ExpandoValueLocalServiceUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.lock.DuplicateLockException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
@@ -59,7 +70,12 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.capabilities.TrashCapability;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -71,11 +87,13 @@ import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.upload.UploadRequestSizeException;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
@@ -85,12 +103,14 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.trash.service.TrashEntryService;
 import com.liferay.upload.UploadResponseHandler;
 
+import java.io.IOException;
 import java.io.InputStream;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -873,6 +893,9 @@ public class EditFileEntryMVCActionCommand extends BaseMVCActionCommand {
 			WebKeys.THEME_DISPLAY);
 
 		String cmd = ParamUtil.getString(uploadPortletRequest, Constants.CMD);
+		
+		//-------------Timao------------------------------------
+		long userId = PortalUtil.getUserId(uploadPortletRequest);
 
 		long fileEntryId = ParamUtil.getLong(
 			uploadPortletRequest, "fileEntryId");
@@ -941,6 +964,21 @@ public class EditFileEntryMVCActionCommand extends BaseMVCActionCommand {
 				fileEntry = _dlAppService.addFileEntry(
 					repositoryId, folderId, sourceFileName, contentType, title,
 					description, changeLog, inputStream, size, serviceContext);
+				
+				//add fileshortcut ---------------hxm------------------				
+				fileEntryId = fileEntry.getFileEntryId();		
+				String fileEntryTypeId = String.valueOf(serviceContext.getAttribute("fileEntryTypeId"));
+				boolean hasPermissionToAddShortcut = false;
+				if(fileEntryTypeId.equals("90986") || fileEntryTypeId.equals("97674") || fileEntryTypeId.equals("95909")){
+					hasPermissionToAddShortcut = true;
+				}
+				long torepositoryId = 20126;
+				addFileShortcut(actionRequest, repositoryId, torepositoryId, folderId, fileEntry, hasPermissionToAddShortcut);
+				//add attachments ----------------hxm------------------
+				boolean hasAttachments = true;
+				addAttachmentsExpandoValue(actionRequest, uploadPortletRequest,
+					repositoryId, folderId, userId, fileEntryId, fileEntry, themeDisplay, hasAttachments);	
+				
 
 				if (cmd.equals(Constants.ADD_DYNAMIC)) {
 					JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
@@ -959,11 +997,26 @@ public class EditFileEntryMVCActionCommand extends BaseMVCActionCommand {
 					fileEntryId, sourceFileName, contentType, title,
 					description, changeLog, majorVersion, inputStream, size,
 					serviceContext);
+				
+				//add attachments up---------------hxm------------------
+				boolean hasAttachments = true;
+				addAttachmentsExpandoValue(actionRequest, uploadPortletRequest,
+					repositoryId, folderId, userId, fileEntryId, fileEntry, themeDisplay, hasAttachments);
 			}
 			else {
 
 				// Update file entry
-
+				//define fileEntryIds---------------hxm------------------
+				long[] fileEntryIds = saveAttachmentsFiles(actionRequest,
+						repositoryId, folderId, userId, fileEntryId, fileEntry, themeDisplay);
+				
+				//add attachments up---------------hxm------------------
+				Map<String, Serializable> attributes =
+						new HashMap<String, Serializable>();
+				String expandoColumn = "attachments";
+				attributes.put(expandoColumn, fileEntryIds);
+				serviceContext.setExpandoBridgeAttributes(attributes);	
+				
 				fileEntry = _dlAppService.updateFileEntry(
 					fileEntryId, sourceFileName, contentType, title,
 					description, changeLog, majorVersion, inputStream, size,
@@ -974,6 +1027,236 @@ public class EditFileEntryMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
+	//add fileShortcut method---------------hxm------------------
+
+	protected void addFileShortcut(
+			ActionRequest actionRequest, long repositoryId, long toRepositoryId, long folderId, FileEntry fileEntry, boolean hasPermissionToAddShortcut)
+		throws Exception {
+		if( hasPermissionToAddShortcut == true){
+		    ServiceContext serviceContextShortcut = new ServiceContext();
+		    serviceContextShortcut.setScopeGroupId(repositoryId);
+		    long toFileEntryId = fileEntry.getFileEntryId();				
+		    DLAppServiceUtil.addFileShortcut(
+				    toRepositoryId, folderId, toFileEntryId, serviceContextShortcut);				
+//		    AssetPublisherUtil.addAndStoreSelection(
+//				    actionRequest, DLFileShortcut.class.getName(),
+//				    fileShortcut.getFileShortcutId(), -1);
+		}
+	}
+
+	protected long[] saveAttachmentsFiles(
+			ActionRequest actionRequest, UploadPortletRequest uploadPortletRequest,
+			long repositoryId, long folderId, long userId, long fileEntryId,
+			FileEntry fileEntry, ThemeDisplay themeDisplay)
+		throws Exception {    	
+			UploadPortletRequest attachmentUploadPortletRequest =
+				PortalUtil.getUploadPortletRequest(actionRequest);
+			List<Long> attachmentFileEntryIds=new ArrayList<Long>();
+			
+			int attachmentTotal = ParamUtil.getInteger(
+					uploadPortletRequest, "attachmentTotal");					
+			for (int i = 0; i < attachmentTotal; i++) {
+				String fileName = attachmentUploadPortletRequest.getFileName(
+					"msgFile" + i);
+				InputStream attachmentInputStream = attachmentUploadPortletRequest.getFileAsStream(
+					"msgFile" + i);			
+				if ((attachmentInputStream == null) || Validator.isNull(fileName)) {
+					continue;
+				}
+				ServiceContext attactmentServiceContext = new ServiceContext();
+				attactmentServiceContext.setGuestPermissions(new String[] {ActionKeys.ACCESS});
+				attactmentServiceContext.setScopeGroupId(repositoryId);
+				attactmentServiceContext.setAddGroupPermissions(true);
+				attactmentServiceContext.setAddGuestPermissions(true);						 
+				try {
+					String attactmentDescription = StringPool.BLANK;
+					String attactmentChangeLog = StringPool.BLANK;
+					byte[] attactmentBytes = FileUtil.getBytes(attachmentInputStream);
+					String mimeType = MimeTypesUtil.getContentType(fileName);						 
+				//因为liferay默认情况下不能上传同名的文件，为了处理这个问题，添加一个时间戳						 
+					String attachmentTitle = fileName + "-" + System.currentTimeMillis();
+					String newFolderName = String.valueOf(fileEntryId);
+					long parentFolderId = folderId;
+					String newFolderDescription = "File Attachments Child Folder";
+					String childParentFolderName = "FileAttachments";
+					String childParentFolderDescription = "File Attachments Parents Folder";
+					Folder attachmentFolder = getExistingOrCreateNewFolder(repositoryId, userId, parentFolderId, childParentFolderName, childParentFolderDescription, newFolderName, newFolderDescription, themeDisplay, attactmentServiceContext);
+					long attachmentFolderId = attachmentFolder.getFolderId();
+					
+					FileEntry attactmentFileEntry = DLAppLocalServiceUtil.addFileEntry(userId, repositoryId, attachmentFolderId,
+					fileName, mimeType, attachmentTitle, attactmentDescription, attactmentChangeLog, attactmentBytes, attactmentServiceContext);
+					long attachmentFileEntryId = attactmentFileEntry.getFileEntryId();
+					attachmentFileEntryIds.add(attachmentFileEntryId);					
+				} catch (PortalException e) {
+					e.printStackTrace();
+					} catch (SystemException e) {
+					e.printStackTrace();
+					} catch (IOException e) {
+					e.printStackTrace();
+					}
+			}
+			long[] fileEntryIds = new long[attachmentFileEntryIds.size()];
+			for(int i = 0, j = attachmentFileEntryIds.size(); i < j; i++){
+				fileEntryIds[i]=attachmentFileEntryIds.get(i);
+			}
+			return fileEntryIds;
+		}
+
+	protected long[] saveAttachmentsFiles(
+			ActionRequest actionRequest, long repositoryId, long folderId, long userId, long fileEntryId,
+			FileEntry fileEntry, ThemeDisplay themeDisplay)
+		throws Exception {    	
+			UploadPortletRequest attachmentUploadPortletRequest =
+				PortalUtil.getUploadPortletRequest(actionRequest);
+			
+			Map<String, Long> saveFileEntryIdsMap =
+					new LinkedHashMap<String, Long>();
+			Map<String, Long> noSaveFileEntryIdsMap =
+					new LinkedHashMap<String, Long>();
+			
+			int attachmentTotal = ParamUtil.getInteger(
+					attachmentUploadPortletRequest, "attachmentTotal");					
+			for (int i = 0; i < attachmentTotal; i++) {
+				String fileName = attachmentUploadPortletRequest.getFileName(
+					"msgFile" + i);
+				InputStream attachmentInputStream = attachmentUploadPortletRequest.getFileAsStream(
+					"msgFile" + i);
+				long attachmentFileEntryIndex = ParamUtil.getLong(
+						attachmentUploadPortletRequest, "attachmentFileEntryIndex" + i);
+				noSaveFileEntryIdsMap.put(String.valueOf(i), attachmentFileEntryIndex);
+				
+				if ((attachmentInputStream == null) || Validator.isNull(fileName)) {
+					continue;
+				}
+				ServiceContext attactmentServiceContext = new ServiceContext();
+				attactmentServiceContext.setGuestPermissions(new String[] {ActionKeys.ACCESS});
+				attactmentServiceContext.setScopeGroupId(repositoryId);
+				attactmentServiceContext.setAddGroupPermissions(true);
+				attactmentServiceContext.setAddGuestPermissions(true);						 
+				try {
+					String attactmentDescription = StringPool.BLANK;
+					String attactmentChangeLog = StringPool.BLANK;
+					byte[] attactmentBytes = FileUtil.getBytes(attachmentInputStream);
+					String mimeType = MimeTypesUtil.getContentType(fileName);						 
+				//因为liferay默认情况下不能上传同名的文件，为了处理这个问题，添加一个时间戳						 
+					String attachmentTitle = fileName + "-" + System.currentTimeMillis();
+					String newFolderName = String.valueOf(fileEntryId);
+					long parentFolderId = folderId;
+					String newFolderDescription = "File Attachments Child Folder";
+					String childParentFolderName = "FileAttachments";
+					String childParentFolderDescription = "File Attachments Parents Folder";
+					Folder attachmentFolder = getExistingOrCreateNewFolder(repositoryId, userId, parentFolderId, childParentFolderName, childParentFolderDescription, newFolderName, newFolderDescription, themeDisplay, attactmentServiceContext);
+					long attachmentFolderId = attachmentFolder.getFolderId();
+					
+					FileEntry attactmentFileEntry = DLAppLocalServiceUtil.addFileEntry(userId, repositoryId, attachmentFolderId,
+					fileName, mimeType, attachmentTitle, attactmentDescription, attactmentChangeLog, attactmentBytes, attactmentServiceContext);
+					long attachmentFileEntryId = attactmentFileEntry.getFileEntryId();					
+					saveFileEntryIdsMap.put(String.valueOf(i), attachmentFileEntryId);
+					
+				} catch (PortalException e) {
+					e.printStackTrace();
+					} catch (SystemException e) {
+					e.printStackTrace();
+					} catch (IOException e) {
+					e.printStackTrace();
+					}
+			}
+			//合并两个map，如果key相同，则用saveFileEntryIdsMap覆盖noSaveFileEntryIdsMap的value			
+			noSaveFileEntryIdsMap.putAll(saveFileEntryIdsMap);
+			List<Long> list=new ArrayList<Long>();
+			for (Long value : noSaveFileEntryIdsMap.values()) { 
+				if(value != 0)
+					list.add(value);  
+			}
+			
+			long[] fileEntryIds = new long[list.size()];
+			for(int i = 0; i < list.size(); i++){
+				fileEntryIds[i]=list.get(i);
+			}
+			return fileEntryIds;
+		}
+	
+	protected void addAttachmentsExpandoValue(
+			ActionRequest actionRequest, UploadPortletRequest uploadPortletRequest,
+			long repositoryId, long folderId, long userId, long fileEntryId,
+			FileEntry fileEntry, ThemeDisplay themeDisplay, boolean hasAttachments)
+		throws Exception {
+	    if (hasAttachments == true) {
+	    	long[] fileEntryIds = saveAttachmentsFiles(actionRequest,  uploadPortletRequest,
+	    			repositoryId, folderId, userId, fileEntryId, fileEntry, themeDisplay);
+			long classNameId = ClassNameLocalServiceUtil.getClassNameId(DLFileEntry.class.getName());
+			ExpandoTable expandoTable = ExpandoTableLocalServiceUtil.getTable(themeDisplay.getCompanyId(), classNameId, "CUSTOM_FIELDS");
+			ExpandoRowLocalServiceUtil.addRow(expandoTable.getTableId(), fileEntryId);				   
+			ExpandoValueLocalServiceUtil.addValue(themeDisplay.getCompanyId(), DLFileEntry.class.getName(),expandoTable.getName(),"attachments", fileEntryId, fileEntryIds);							 
+		}
+	}
+	
+	protected long[] getPreviousVersionAttachmentFileEntryIds(
+			ActionRequest actionRequest)
+		throws Exception {	 
+	    	//获得上版本没被删除的FileEntryIds
+			UploadPortletRequest uploadPortletRequest =
+				PortalUtil.getUploadPortletRequest(actionRequest);
+			List<Long> previousVersionAttachmentFileEntryIds=new ArrayList<Long>();
+			int previousVersionAttachmentTotal = ParamUtil.getInteger(
+					uploadPortletRequest, "previousVersionAttachmentTotal");				
+			for (int i = previousVersionAttachmentTotal - 1; i >= 0; i--) {
+				long previousVersionAttachmentFileEntryId = ParamUtil.getLong(
+						uploadPortletRequest, "attachmentFileEntryIndex" + i);				
+				if (previousVersionAttachmentFileEntryId != 0){
+					previousVersionAttachmentFileEntryIds.add(0, previousVersionAttachmentFileEntryId);					
+				}
+			}
+	    	//转换数据类型
+			long[] tempFileEntryIds = new long[previousVersionAttachmentFileEntryIds.size()];
+			for(int i = 0, j = previousVersionAttachmentFileEntryIds.size(); i < j; i++){
+				tempFileEntryIds[i] = previousVersionAttachmentFileEntryIds.get(i);
+			}
+			return tempFileEntryIds;		   
+	}
+	
+	
+	protected Folder getExistingOrCreateNewFolder(
+			long repositoryId,
+			long userId, 
+			long parentFolderId,
+			String childParentFolderName,
+			String childParentFolderDescription,
+			String newFolderName,
+			String newFolderDescription,
+			ThemeDisplay themeDisplay,
+			ServiceContext serviceContext)
+		throws PortalException, NoSuchFolderException {
+			long childParentFolderId = 0;
+			try {
+				Folder childParentFolder = DLAppLocalServiceUtil.getFolder(repositoryId, parentFolderId, childParentFolderName);
+				childParentFolderId = childParentFolder.getFolderId();
+			}catch (final NoSuchFolderException e) {
+				Folder childParentFolder = DLAppLocalServiceUtil.addFolder(userId, repositoryId, parentFolderId, childParentFolderName, childParentFolderDescription, serviceContext);
+				childParentFolderId = childParentFolder.getFolderId();
+			}
+			try {
+				Folder alreadyExistingFolder = DLAppLocalServiceUtil.getFolder(repositoryId, childParentFolderId, newFolderName);
+				String alreadyExistingFolderId = String.valueOf(alreadyExistingFolder.getFolderId());
+				long companyId = themeDisplay.getCompanyId();
+				Role guestRole = RoleLocalServiceUtil.getRole(companyId, RoleConstants.GUEST);
+				String[] actionIds = new String[] { ActionKeys.ACCESS };
+				ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId, DLFolder.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, alreadyExistingFolderId, guestRole.getRoleId(), actionIds);
+				ResourcePermissionLocalServiceUtil.removeResourcePermissions(companyId, DLFolder.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, guestRole.getRoleId(), ActionKeys.VIEW);
+				return alreadyExistingFolder ;
+			} catch (final NoSuchFolderException e) {
+			  	Folder newFolder = DLAppLocalServiceUtil.addFolder(userId, repositoryId, childParentFolderId, newFolderName, newFolderDescription, serviceContext);
+				String newFolderId = String.valueOf(newFolder.getFolderId());
+				long companyId = themeDisplay.getCompanyId();
+				Role guestRole = RoleLocalServiceUtil.getRole(companyId, RoleConstants.GUEST);
+				String[] actionIds = new String[] { ActionKeys.ACCESS };
+				ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId, DLFolder.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, newFolderId, guestRole.getRoleId(), actionIds);
+				ResourcePermissionLocalServiceUtil.removeResourcePermissions(companyId, DLFolder.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, guestRole.getRoleId(), ActionKeys.VIEW);
+				return newFolder;
+			}
+	}
+	
+	
 	private static final Log _log = LogFactoryUtil.getLog(
 		EditFileEntryMVCActionCommand.class);
 

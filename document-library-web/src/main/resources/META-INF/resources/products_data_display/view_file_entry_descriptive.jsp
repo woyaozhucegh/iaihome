@@ -52,9 +52,9 @@ rowURL.setParameter("redirect", HttpUtil.removeParameter(currentURL, liferayPort
 rowURL.setParameter("fileEntryId", String.valueOf(fileEntry.getFileEntryId()));
 %>
 
-<h5 class="text-default">
+<h6 class="text-default">
 	<liferay-ui:message arguments="<%= new String[] {HtmlUtil.escape(latestFileVersion.getUserName()), modifiedDateDescription} %>" key="x-modified-x-ago" />
-</h5>
+</h6>
 
 <h4>
 	<aui:a href="<%= rowURL.toString() %>">
@@ -68,9 +68,11 @@ rowURL.setParameter("fileEntryId", String.valueOf(fileEntry.getFileEntryId()));
 	</c:if>
 </h4>
 
-<span class="h5 text-default">
-	<aui:workflow-status markupView="lexicon" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= latestFileVersion.getStatus() %>" />
-</span>
+<c:if test="<%= Validator.isNotNull(latestFileVersion.getDescription()) %>">
+	<dd class="sidebar-dd fileentry-description">
+		<%= HtmlUtil.escape(latestFileVersion.getDescription()) %>
+	</dd>
+</c:if>
 
 <c:if test="<%= latestFileVersion.getModel() instanceof DLFileVersion %>">
 
@@ -80,7 +82,7 @@ rowURL.setParameter("fileEntryId", String.valueOf(fileEntry.getFileEntryId()));
 	DLFileEntryType dlFileEntryType = latestDLFileVersion.getDLFileEntryType();
 	%>
 
-	<span class="h5 text-default">
-		<%= HtmlUtil.escape(dlFileEntryType.getName(locale)) %>
+	<span class="h6 text-default">
+		<%= LanguageUtil.get(request, HtmlUtil.escape(dlFileEntryType.getName(locale))) %>
 	</span>
 </c:if>

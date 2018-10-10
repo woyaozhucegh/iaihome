@@ -14,9 +14,11 @@
  */
 --%>
 
-<%@ include file="/document_library/init.jsp" %>
+<%@ include file="/products_data_display/init.jsp" %>
 
 <%
+int attachmentNumber = 1;
+		 
 String cmd = ParamUtil.getString(request, Constants.CMD, Constants.EDIT);
 
 String redirect = ParamUtil.getString(request, "redirect");
@@ -72,15 +74,37 @@ if (fileEntry != null) {
 }
 
 DLFileEntryType dlFileEntryType = null;
+String dlFileEntrytypeName = "base documents";
 
 if (fileEntryTypeId >= 0) {
 	dlFileEntryType = DLFileEntryTypeLocalServiceUtil.getFileEntryType(fileEntryTypeId);
+	dlFileEntrytypeName = dlFileEntryType.getName(locale);
 }
 
 boolean majorVersion = ParamUtil.getBoolean(request, "majorVersion");
 boolean updateVersionDetails = ParamUtil.getBoolean(request, "updateVersionDetails");
 
 long assetClassPK = 0;
+
+//GET FileEntry attachments
+
+long[] defaultData = {101594};
+long[] attachmentFileEntryIds = {101594};
+long classNameId = ClassNameLocalServiceUtil.getClassNameId(DLFileEntry.class.getName());
+ExpandoTable expandoTable = ExpandoTableLocalServiceUtil.getTable(themeDisplay.getCompanyId(), classNameId, "CUSTOM_FIELDS");
+try{
+	if (fileEntry != null){
+		if (!fileVersion.getVersion().equals(DLFileEntryConstants.VERSION_DEFAULT)) {
+			attachmentFileEntryIds = ExpandoValueLocalServiceUtil.getData(themeDisplay.getCompanyId(), DLFileEntry.class.getName(),expandoTable.getName(),"attachments", fileVersion.getFileVersionId(), defaultData);		
+		}else {
+			attachmentFileEntryIds = ExpandoValueLocalServiceUtil.getData(themeDisplay.getCompanyId(), DLFileEntry.class.getName(),expandoTable.getName(),"attachments", fileEntry.getFileEntryId(), defaultData);							 
+		}
+	}
+}catch(Exception e){
+	System.out.println(e);
+}
+
+
 
 if ((fileVersion != null) && !fileVersion.isApproved() && Validator.isNotNull(fileVersion.getVersion()) && !fileVersion.getVersion().equals(DLFileEntryConstants.VERSION_DEFAULT)) {
 	assetClassPK = fileVersion.getFileVersionId();
@@ -445,6 +469,75 @@ if (portletTitleBasedNavigation) {
 					</aui:fieldset>
 				</c:if>
 
+		<%
+			if(dlFileEntrytypeName.equals("products")||dlFileEntrytypeName.equals("models")){
+		%>
+				<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="related-assets">
+						<div id="attachment" style="position:relative;">
+					<%	
+						if (fileEntry != null) {
+							String attachmentFileEntryURL = null;
+							String attachmentSmallImageURL = null;								
+							FileEntry attachmentFileEntry = null;
+							for(attachmentNumber = 0; attachmentNumber < attachmentFileEntryIds.length; attachmentNumber++){
+								attachmentFileEntry = DLAppLocalServiceUtil.getFileEntry(attachmentFileEntryIds[attachmentNumber]);
+								attachmentFileEntryURL = "/documents/" + attachmentFileEntry.getRepositoryId() + "/" + attachmentFileEntry.getUuid();												
+								
+					%>
+				               <div class="fileinput fileinput-new" data-provides="fileinput"  id="exampleInputUpload">
+				                    <div class="fileinput-new2 thumbnail" style="width: 200px;height: auto;max-height:150px;">
+				                        <img id='picImg' style="width: 100%;height: auto;max-height: 140px;" src="<%= attachmentFileEntryURL %>" alt="" />
+				                    </div>
+				                    <div class="fileinput-new thumbnail" style="width: 200px;height: auto;max-height:150px;">
+				                        <img id='picImg' style="width: 100%;height: auto;max-height: 140px;" src="<%=request.getContextPath()%>/document_library/images/noimage.png" alt="" />
+				                    </div>
+				                    <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"></div>
+				                    <div>
+				                        <span class="btn btn-primary btn-file">
+				                            <span class="fileinput-new">select image</span>
+				                            <span class="fileinput-exists">change image</span>
+				                            <input type="file" name='<%= "msgFile" + attachmentNumber %>' id="picID" accept="image/gif,image/jpeg,image/x-png">
+				                            <input type="hidden" id="attachmentFileEntryId" name='<%= "attachmentFileEntryIndex" + attachmentNumber %>' value='<%= attachmentFileEntryIds[attachmentNumber] %>'/>
+				                            <input type="hidden" id="previousVersionAttachmentTotal" name="previousVersionAttachmentTotal" value='<%= attachmentFileEntryIds.length %>'/>
+				                        </span>
+				                        <a href="javascript:;" class="btn btn-warning" data-dismiss="fileinput">delete</a>
+				                        <a href="javascript:;" class="deleteDefaultImg btn btn-warning">delete2</a>
+				                    </div>
+				                </div>
+				    <%
+							}
+						}else{								
+							for (attachmentNumber = 0; attachmentNumber < 5; attachmentNumber++) {
+		%>
+			
+				               <div class="fileinput fileinput-new" data-provides="fileinput"  id="exampleInputUpload">
+				                    <div class="fileinput-new thumbnail" style="width: 200px;height: auto;max-height:150px;">
+				                        <img id='picImg' style="width: 100%;height: auto;max-height: 140px;" src="<%=request.getContextPath()%>/document_library/images/noimage.png" alt="" />
+				                    </div>
+				                    <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"></div>
+				                    <div>
+				                        <span class="btn btn-primary btn-file">
+				                            <span class="fileinput-new">select image</span>
+				                            <span class="fileinput-exists">change image</span>
+				                            <input type="file" name='<%= "msgFile" + attachmentNumber %>' id="picID" accept="image/gif,image/jpeg,image/x-png">
+				                        	<input type="hidden" id="attachmentFileEntryId" name='<%= "attachmentFileEntryIndex" + attachmentNumber %>' value=''/>
+				                        </span>
+				                        <a href="javascript:;" class="btn btn-warning fileinput-exists" data-dismiss="fileinput">delete</a>
+				                    </div>
+				                </div>
+					<%
+							}
+						}
+					%>		
+						<input id="attachmentTotal" name="attachmentTotal" type="hidden" value="5"/>	
+						<div style="position: absolute; bottom: 0px; margin: 10px; "><button id="add_attachment" type="button" >add image</button></div>
+					</div>
+				</aui:fieldset>
+		<%		
+			}
+		%>
+
+
 				<c:if test="<%= (folder == null) || folder.isSupportsMetadata() %>">
 					<liferay-expando:custom-attributes-available
 						className="<%= DLFileEntryConstants.getClassName() %>"
@@ -467,6 +560,9 @@ if (portletTitleBasedNavigation) {
 							classPK="<%= assetClassPK %>"
 							classTypePK="<%= fileEntryTypeId %>"
 						/>
+<span class="field-content">
+<label>tag</label>
+</span>
 
 						<liferay-asset:asset-tags-selector
 							className="<%= DLFileEntry.class.getName() %>"
@@ -658,3 +754,33 @@ else {
 <%!
 private static Log _log = LogFactoryUtil.getLog("com_liferay_document_library_web.document_library.edit_file_entry_jsp");
 %>
+
+<aui:script>
+<!--大于5张附件照片，可手动增加-->
+$(document).ready(function(){
+  var j = <%= attachmentNumber %>
+  $("#add_attachment").click(function(){
+    $("div#attachment").append("<div class='fileinput fileinput-new' data-provides='fileinput'  id='exampleInputUpload'><div class='fileinput-new thumbnail' style='width: 200px;height: auto;max-height:150px;'><img id='picImg' style='width: 100%;height: auto;max-height: 140px;' src='/o/document-library-web/document_library/images/noimage.png' alt='' /></div><div class='fileinput-preview fileinput-exists thumbnail' style='max-width: 200px; max-height: 150px;'></div><div><span class='btn btn-primary btn-file'><span class='fileinput-new'>select image</span><span class='fileinput-exists'>change image</span><input type='file' name='msgFile"+ j +"' id='picID' accept='image/gif,image/jpeg,image/x-png'></span><a href='javascript:;' class='btn btn-warning fileinput-exists' data-dismiss='fileinput'>delete</a></div></div>");
+		j++;
+		$("#attachmentTotal").val(j);
+  });
+ 
+<!--移除原附件的显示，不删除文件-->
+  $(".fileinput").each(function(){
+  	var new2 = $(this);
+  	if (new2.find("#attachmentFileEntryId").val() != ""){
+  		new2.children(".fileinput-new").hide();
+  	}
+  	
+	new2.find(".deleteDefaultImg").click(function(){
+		var r=confirm("Are you sure to delete!");
+		if(r==true){
+		  	new2.hide();
+			new2.find("#attachmentFileEntryId").val("");
+			console.log("value=" + new2.find("#attachmentFileEntryId").val());
+		}
+	});
+	
+  });
+});
+</aui:script>

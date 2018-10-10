@@ -139,14 +139,15 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 									/>
 								</c:when>
 								<c:when test="<%= Validator.isNotNull(thumbnailSrc) %>">
-									<liferay-ui:search-container-column-image
-										src="<%= thumbnailSrc %>"
-										toggleRowChecker="<%= true %>"
-									/>
+									<liferay-ui:search-container-column-text>
+										<div>
+											<img class="sticker-PDataDisplay sticker-secondary <%= dlViewFileVersionDisplayContext.getCssClassFileMimeType() %>" src="<%= thumbnailSrc %>"  />
+										</div>
+									</liferay-ui:search-container-column-text>
 								</c:when>
 								<c:when test="<%= Validator.isNotNull(latestFileVersion.getExtension()) %>">
 									<liferay-ui:search-container-column-text>
-										<div class="sticker sticker-secondary <%= dlViewFileVersionDisplayContext.getCssClassFileMimeType() %>">
+										<div class="sticker-PDataDisplay sticker-secondary <%= dlViewFileVersionDisplayContext.getCssClassFileMimeType() %>">
 											<%= StringUtil.shorten(StringUtil.upperCase(latestFileVersion.getExtension()), 3, StringPool.BLANK) %>
 										</div>
 									</liferay-ui:search-container-column-text>

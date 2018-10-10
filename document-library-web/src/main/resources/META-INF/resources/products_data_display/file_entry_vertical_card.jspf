@@ -70,17 +70,17 @@ if (fileEntryTypeId > 0) {
 			</div>
 		</c:if>
 		<c:if test="<%= dlFileEntrytypeName.equals("products") %>">
-			<div class="sticker-products sticker-right sticker-bottom products-marking">
+			<div class="sticker sticker-bottom file-icon-color-5">
 				<%= LanguageUtil.get(request, dlFileEntrytypeName) %>
 			</div>
 		</c:if>
 		<c:if test="<%= dlFileEntrytypeName.equals("manuals") %>">
-			<div class="sticker-manuals sticker-right sticker-bottom manuals-marking">
+			<div class="sticker sticker-bottom file-icon-color-3">
 				<%= LanguageUtil.get(request, dlFileEntrytypeName) %>
 			</div>
 		</c:if>
 		<c:if test="<%= dlFileEntrytypeName.equals("models") %>">
-			<div class="sticker-models sticker-right sticker-bottom models-marking">
+			<div class="sticker sticker-bottom file-icon-color-6">
 				<%= LanguageUtil.get(request, dlFileEntrytypeName) %>
 			</div>
 		</c:if>

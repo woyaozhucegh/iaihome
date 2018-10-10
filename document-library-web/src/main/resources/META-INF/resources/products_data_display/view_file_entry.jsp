@@ -115,30 +115,6 @@ if (portletTitleBasedNavigation) {
 		/>
 	</c:if>
 
-	<c:if test="<%= !portletTitleBasedNavigation %>">
-		<div class="btn-group">
-			<c:if test="<%= dlPortletInstanceSettingsHelper.isShowActions() %>">
-
-				<%
-				for (ToolbarItem toolbarItem : dlViewFileVersionDisplayContext.getToolbarItems()) {
-				%>
-
-					<liferay-ui:toolbar-item
-						toolbarItem="<%= toolbarItem %>"
-					/>
-
-				<%
-				}
-				%>
-
-			</c:if>
-
-			<liferay-frontend:management-bar-sidenav-toggler-button
-				label="info"
-			/>
-		</div>
-	</c:if>
-
 	<liferay-frontend:sidebar-panel>
 
 		<%
@@ -191,91 +167,85 @@ if (portletTitleBasedNavigation) {
 
 		<div class="body-row">
 			<div class="main-content-card panel">
-				<div class="document-info panel-body">
-					<h2 title="<%= HtmlUtil.escapeAttribute(documentTitle) %>">
-						<%= HtmlUtil.escape(documentTitle) %>
-					</h2>
-
-					<span class="document-thumbnail">
-
-						<%
+			
+				<div class="container">
+				  <div class="row">
+				    <%
 						String thumbnailSrc = DLUtil.getThumbnailSrc(fileEntry, fileVersion, themeDisplay);
-						%>
-
-						<c:if test="<%= Validator.isNotNull(thumbnailSrc) %>">
-							<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="thumbnail" />" class="thumbnail" src="<%= thumbnailSrc %>" style="<%= DLUtil.getThumbnailStyle(true, 0, 128, 128) %>" />
-						</c:if>
-					</span>
-					<span class="user-date">
-
-						<%
-						User userDisplay = UserLocalServiceUtil.fetchUser(fileEntry.getUserId());
-
-						String uploadedByMessage = StringPool.BLANK;
-
-						if ((userDisplay != null) && userDisplay.isActive()) {
-							uploadedByMessage = LanguageUtil.format(resourceBundle, "uploaded-by-x-x", new Object[] {userDisplay.getDisplayURL(themeDisplay), HtmlUtil.escape(fileEntry.getUserName()), dateFormatDateTime.format(fileEntry.getCreateDate())}, false);
-						}
-						else {
-							uploadedByMessage = LanguageUtil.format(resourceBundle, "uploaded-by-x", new Object[] {HtmlUtil.escape(fileEntry.getUserName()), dateFormatDateTime.format(fileEntry.getCreateDate())}, false);
-						}
-						%>
-
-						<liferay-ui:icon
-							iconCssClass="icon-plus"
-							label="<%= true %>"
-							message="<%= uploadedByMessage %>"
-						/>
-					</span>
-
-					<c:if test="<%= dlPortletInstanceSettings.isEnableRatings() && fileEntry.isSupportsSocial() %>">
-						<span class="lfr-asset-ratings">
-							<liferay-ui:ratings
-								className="<%= DLFileEntryConstants.getClassName() %>"
-								classPK="<%= fileEntryId %>"
-								inTrash="<%= fileEntry.isInTrash() %>"
-							/>
-						</span>
-					</c:if>
-
-					<%
-					if (layoutAssetEntry != null) {
-						AssetEntry incrementAssetEntry = AssetEntryServiceUtil.incrementViewCounter(layoutAssetEntry.getClassName(), fileEntry.getFileEntryId());
-
-						if (incrementAssetEntry != null) {
-							layoutAssetEntry = incrementAssetEntry;
-						}
-					}
 					%>
+				    <div class=<%= Validator.isNotNull(thumbnailSrc) ? "col-4" : "col-0" %>>
+						<c:if test="<%= Validator.isNotNull(thumbnailSrc) %>">
+							<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="thumbnail" />" class="PDataDisplay-thumbnail" src="<%= thumbnailSrc %>"  />
+						</c:if>
+				    </div>
+				    <div class=<%= Validator.isNotNull(thumbnailSrc) ? "col-8" : "col-12" %>>
+	                    <div class="row">
+		                    <c:if test="<%= Validator.isNotNull(fileEntry.getDescription()) %>">
+								<dd class="sidebar-dd fileentry-description">
+									<%= HtmlUtil.escape(fileEntry.getDescription()) %>
+								</dd>
+							</c:if>
+	                    </div>
+	                    <div class="row">
 
-					<c:if test="<%= (layoutAssetEntry != null) && dlPortletInstanceSettings.isEnableRelatedAssets() && fileEntry.isSupportsSocial() %>">
-						<div class="entry-links">
-							<liferay-asset:asset-links
-								assetEntryId="<%= layoutAssetEntry.getEntryId() %>"
-							/>
-						</div>
-					</c:if>
+	                        <span class="user-date">
+		
+								<%
+								User userDisplay = UserLocalServiceUtil.fetchUser(fileEntry.getUserId());
+		
+								String uploadedByMessage = StringPool.BLANK;
+		
+								if ((userDisplay != null) && userDisplay.isActive()) {
+									uploadedByMessage = LanguageUtil.format(resourceBundle, "uploaded-by-x-x", new Object[] {userDisplay.getDisplayURL(themeDisplay), HtmlUtil.escape(fileEntry.getUserName()), dateFormatDateTime.format(fileEntry.getCreateDate())}, false);
+								}
+								else {
+									uploadedByMessage = LanguageUtil.format(resourceBundle, "uploaded-by-x", new Object[] {HtmlUtil.escape(fileEntry.getUserName()), dateFormatDateTime.format(fileEntry.getCreateDate())}, false);
+								}
+								%>
+		
+								<liferay-ui:icon
+									iconCssClass="icon-plus"
+									label="<%= true %>"
+									message="<%= uploadedByMessage %>"
+								/>
+							</span>
+	                        
+	
+		                   <c:if test="<%= dlPortletInstanceSettings.isEnableRatings() && fileEntry.isSupportsSocial() %>">
+								<span class="PDataDisplay-ratings">
+									<liferay-ui:ratings
+										className="<%= DLFileEntryConstants.getClassName() %>"
+										classPK="<%= fileEntryId %>"
+										inTrash="<%= fileEntry.isInTrash() %>"
+									/>
+								</span>
+							</c:if>
+	                    </div>
+	                    <div class="row">
+	                    	<c:if test="<%= !portletTitleBasedNavigation %>">
 
-					<span class="document-description">
-						<%= HtmlUtil.escape(fileVersion.getDescription()) %>
-					</span>
-
-					<c:if test="<%= fileEntry.isSupportsSocial() %>">
-						<div class="lfr-asset-categories">
-							<liferay-asset:asset-categories-summary
-								className="<%= DLFileEntryConstants.getClassName() %>"
-								classPK="<%= assetClassPK %>"
-							/>
-						</div>
-
-						<div class="lfr-asset-tags">
-							<liferay-asset:asset-tags-summary
-								className="<%= DLFileEntryConstants.getClassName() %>"
-								classPK="<%= assetClassPK %>"
-								message="tags"
-							/>
-						</div>
-					</c:if>
+									<c:if test="<%= dlPortletInstanceSettingsHelper.isShowActions() %>">
+						
+										<%
+										for (ToolbarItem toolbarItem : dlViewFileVersionDisplayContext.getToolbarItems()) {
+										%>
+						
+											<liferay-ui:toolbar-item
+												toolbarItem="<%= toolbarItem %>"
+											/>
+						
+										<%
+										}
+										%>						
+									</c:if>						
+									<liferay-frontend:management-bar-sidenav-toggler-button
+										label="info"
+									/>
+								
+							</c:if>
+	                    </div>
+				    </div>
+				  </div>
 				</div>
 			</div>
 
@@ -295,6 +265,90 @@ if (portletTitleBasedNavigation) {
 				%>
 
 			</c:if>
+
+			<liferay-ui:panel-container
+				cssClass="metadata-panel-container"
+				extended="<%= true %>"
+				markupView="lexicon"
+				persistState="<%= true %>"
+			>
+				<c:if test="<%= dlViewFileVersionDisplayContext.getDDMStructuresCount() > 0 %>">
+
+					<%
+					try {
+						List<DDMStructure> ddmStructures = dlViewFileVersionDisplayContext.getDDMStructures();
+
+						for (DDMStructure ddmStructure : ddmStructures) {
+							DDMFormValues ddmFormValues = null;
+
+							List<DDMFormFieldValue> ddmFormFieldValues = new ArrayList<DDMFormFieldValue>();
+
+							try {
+								ddmFormValues = dlViewFileVersionDisplayContext.getDDMFormValues(ddmStructure);
+
+								ddmFormFieldValues = ddmFormValues.getDDMFormFieldValues();
+							}
+							catch (Exception e) {
+							}
+					%>
+
+							<c:if test="<%= !ddmFormFieldValues.isEmpty() %>">
+								<liferay-ui:panel
+									collapsible="<%= true %>"
+									cssClass="metadata"
+									defaultState="closed"
+									extended="<%= true %>"
+									id='<%= "documentLibraryMetadataPanel" + StringPool.UNDERLINE + ddmStructure.getStructureId() %>'
+									markupView="lexicon"
+									persistState="<%= true %>"
+									title="<%= HtmlUtil.escape(ddmStructure.getName(locale)) %>"
+								>
+									<liferay-ddm:html
+										classNameId="<%= PortalUtil.getClassNameId(com.liferay.dynamic.data.mapping.model.DDMStructure.class) %>"
+										classPK="<%= ddmStructure.getPrimaryKey() %>"
+										ddmFormValues="<%= ddmFormValues %>"
+										fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
+										readOnly="<%= true %>"
+										requestedLocale="<%= locale %>"
+										showEmptyFieldLabel="<%= false %>"
+									/>
+								</liferay-ui:panel>
+							</c:if>
+
+					<%
+						}
+					}
+					catch (Exception e) {
+					}
+					%>
+
+				</c:if>
+
+				<liferay-expando:custom-attributes-available
+					className="<%= DLFileEntryConstants.getClassName() %>"
+					classPK="<%= fileVersion.getFileVersionId() %>"
+					editable="<%= false %>"
+				>
+					<liferay-ui:panel
+						collapsible="<%= true %>"
+						cssClass="lfr-custom-fields"
+						defaultState="closed"
+						id="documentLibraryCustomFieldsPanel"
+						markupView="lexicon"
+						persistState="<%= true %>"
+						title="custom-fields"
+					>
+						<liferay-expando:custom-attribute-list
+							className="<%= DLFileEntryConstants.getClassName() %>"
+							classPK="<%= fileVersion.getFileVersionId() %>"
+							editable="<%= false %>"
+							label="<%= true %>"
+						/>
+					</liferay-ui:panel>
+				</liferay-expando:custom-attributes-available>
+
+			</liferay-ui:panel-container>
+
 
 			<c:if test="<%= showComments && fileEntry.isRepositoryCapabilityProvided(CommentCapability.class) %>">
 				<liferay-ui:panel

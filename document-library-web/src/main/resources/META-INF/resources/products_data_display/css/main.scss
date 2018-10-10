@@ -1,7 +1,91 @@
 @import "bourbon";
 @import "mixins";
 
-.portlet-document-library, .portlet-document-library-display {
+.portlet-document-library, .portlet-document-library-display, .portlet-products-data-display {
+	/*-----------------tiamo-------------------------------*/
+	.taglib-text{
+		color: #6b6c7e;
+	    font-size: 0.87em;
+	}
+	
+	.PDataDisplay-thumbnail{
+		width:90%;
+	    padding: 2px;
+	    border-radius: 10px;
+	}
+	
+	.PDataDisplay-ratings {   
+	    font-size:0.875em;
+	    padding-left: 20px;
+	    color: #6b6c7e;
+	}
+	.fileentry-description{
+		color: #6b6c7e;
+	}
+	.taglib-asset-links h2 {
+	    color: #999;
+	    font-size: 0.875rem;
+	}
+	
+	.panel-title.h4 {
+	    font-size: 0.875rem;
+	    border-bottom: 3px solid #86affd;
+	    background-color: #ffffff;
+	    padding: 0 0 0 10px;
+	}
+	
+	.taglib-asset-links .asset-links-list-item {
+	    font-size: 0.875rem;
+	}
+	.lfr-discussion-body .lfr-discussion-controls {
+	    font-size: 0.875rem;
+	}
+	.lfr-discussion-message-body{
+		font-size: 0.875rem;
+	}
+	.lfr-discussion-message-author {
+	    font-size: 0.5rem;
+	}
+	.sticker-PDataDisplay {
+	    height: 4rem;
+	    width: 4rem;
+		align-items: center;
+	    border-radius: 0.25rem;
+	    line-height: 2rem;
+	    display: inline-flex;
+	    font-size: 0.625rem;
+	    font-weight: 700;
+	    justify-content: center;
+	    position: relative;
+	    text-align: center;
+	    vertical-align: middle;
+	}
+	.list-group-item-flex > .autofit-col:first-of-type {
+	    padding-right: 10px;
+	}
+	.lfr-search-container-wrapper .list-group .list-group-item h4 {
+	    font-size: 0.875rem;
+	    margin-bottom: 10px 0;
+	}
+	.table-autofit .table-cell-content {
+	    width: 20%;
+	}
+	
+	.nav-tabs + .tab-content .tab-pane {
+	    padding: 1px;
+	}
+	.aspect-ratio-bg-center {
+	    border-radius: 10px;
+	}
+	.btn {
+	    font-size: 0.7rem;
+	}
+	.lfr-ddm-container .field-wrapper-content, .lfr-ddm-container .field-wrapper-content .field-wrapper-content {
+	     margin-left: 0px; 
+	    font-size: 0.875rem;
+	}
+	/*-----------------tiamo-------------------------------*/
+	
 	.file-entry-list-description {
 		font-style: italic;
 		margin-left: 10px;
@@ -355,12 +439,12 @@
 		}
 
 		.username.component-title {
-			margin: 0;
+			margin-left: 1rem;
 		}
 	}
 }
 
-.portlet-document-library, .portlet-document-library-display, .portlet-trash {
+.portlet-document-library, .portlet-document-library-display, .portlet-trash, .portlet-products-data-display{
 	.document-info {
 		&:after {
 			clear: both;
@@ -437,7 +521,7 @@
 
 	.taglib-discussion {
 		margin: 0 auto;
-		width: 90%;
+		width: 100%;
 
 		@include respond-to(phone) {
 			width: auto;
@@ -491,7 +575,7 @@
 	}
 }
 
-.portlet-document-library {
+.portlet-document-library, .portlet-products-data-display {
 	.edit-toolbar {
 		padding-bottom: 15px;
 	}
@@ -537,7 +621,7 @@
 }
 
 .firefox {
-	.portlet-document-library, .portlet-document-library-display {
+	.portlet-document-library, .portlet-document-library-display, .portlet-products-data-display {
 		.audio-node {
 			height: 28px;
 		}
@@ -547,3 +631,6 @@
 		}
 	}
 }
+
+
+

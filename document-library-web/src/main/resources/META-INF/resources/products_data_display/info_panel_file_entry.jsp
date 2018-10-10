@@ -145,10 +145,6 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 							<div class="component-title h4 username">
 								<a href="<%= ownerURL %>"><%= owner.getFullName() %></a>
 							</div>
-
-							<small class="text-muted">
-								<liferay-ui:message key="owner" />
-							</small>
 						</div>
 					</div>
 				</div>
@@ -156,22 +152,6 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 
 
 			<dl class="sidebar-dl sidebar-section">
-				<c:if test="<%= fileVersion.getModel() instanceof DLFileVersion %>">
-
-					<%
-					DLFileVersion dlFileVersion = (DLFileVersion)fileVersion.getModel();
-
-					dlFileEntryType = dlFileVersion.getDLFileEntryType();
-					%>
-
-					<dt class="sidebar-dt">
-						<liferay-ui:message key="document-type" />
-					</dt>
-					<dd class="sidebar-dd">
-						<%= HtmlUtil.escape(dlFileEntryType.getName(locale)) %>
-					</dd>
-				</c:if>
-
 				<liferay-asset:asset-categories-available
 					className="<%= DLFileEntryConstants.getClassName() %>"
 					classPK="<%= assetClassPK %>"
@@ -203,153 +183,20 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 					</dd>
 				</liferay-asset:asset-tags-available>
 
-				<c:if test="<%= Validator.isNotNull(fileEntry.getDescription()) %>">
-					<dt class="sidebar-dt">
-						<liferay-ui:message key="description" />
-					</dt>
-					<dd class="sidebar-dd">
-						<%= HtmlUtil.escape(fileEntry.getDescription()) %>
-					</dd>
-				</c:if>
-
 			</dl>
-
 
 			<c:if test="<%= (layoutAssetEntry != null) && dlPortletInstanceSettings.isEnableRelatedAssets() && fileEntry.isSupportsSocial() %>">
 				<liferay-asset:asset-links
 					assetEntryId="<%= layoutAssetEntry.getEntryId() %>"
 				/>
 			</c:if>
+			
+            <c:if test="<%= Validator.isNotNull(fileEntry.getDescription()) %>">
+				<dd class="sidebar-dd fileentry-description">
+					<%= HtmlUtil.escape(fileEntry.getDescription()) %>
+				</dd>
+			</c:if>
 
-			<liferay-ui:panel-container
-				cssClass="metadata-panel-container"
-				extended="<%= true %>"
-				markupView="lexicon"
-				persistState="<%= true %>"
-			>
-				<c:if test="<%= dlViewFileVersionDisplayContext.getDDMStructuresCount() > 0 %>">
-
-					<%
-					try {
-						List<DDMStructure> ddmStructures = dlViewFileVersionDisplayContext.getDDMStructures();
-
-						for (DDMStructure ddmStructure : ddmStructures) {
-							DDMFormValues ddmFormValues = null;
-
-							List<DDMFormFieldValue> ddmFormFieldValues = new ArrayList<DDMFormFieldValue>();
-
-							try {
-								ddmFormValues = dlViewFileVersionDisplayContext.getDDMFormValues(ddmStructure);
-
-								ddmFormFieldValues = ddmFormValues.getDDMFormFieldValues();
-							}
-							catch (Exception e) {
-							}
-					%>
-
-							<c:if test="<%= !ddmFormFieldValues.isEmpty() %>">
-								<liferay-ui:panel
-									collapsible="<%= true %>"
-									cssClass="metadata"
-									defaultState="closed"
-									extended="<%= true %>"
-									id='<%= "documentLibraryMetadataPanel" + StringPool.UNDERLINE + ddmStructure.getStructureId() %>'
-									markupView="lexicon"
-									persistState="<%= true %>"
-									title="<%= HtmlUtil.escape(ddmStructure.getName(locale)) %>"
-								>
-									<liferay-ddm:html
-										classNameId="<%= PortalUtil.getClassNameId(com.liferay.dynamic.data.mapping.model.DDMStructure.class) %>"
-										classPK="<%= ddmStructure.getPrimaryKey() %>"
-										ddmFormValues="<%= ddmFormValues %>"
-										fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
-										readOnly="<%= true %>"
-										requestedLocale="<%= locale %>"
-										showEmptyFieldLabel="<%= false %>"
-									/>
-								</liferay-ui:panel>
-							</c:if>
-
-					<%
-						}
-					}
-					catch (Exception e) {
-					}
-					%>
-
-				</c:if>
-
-				<liferay-expando:custom-attributes-available
-					className="<%= DLFileEntryConstants.getClassName() %>"
-					classPK="<%= fileVersion.getFileVersionId() %>"
-					editable="<%= false %>"
-				>
-					<liferay-ui:panel
-						collapsible="<%= true %>"
-						cssClass="lfr-custom-fields"
-						defaultState="closed"
-						id="documentLibraryCustomFieldsPanel"
-						markupView="lexicon"
-						persistState="<%= true %>"
-						title="custom-fields"
-					>
-						<liferay-expando:custom-attribute-list
-							className="<%= DLFileEntryConstants.getClassName() %>"
-							classPK="<%= fileVersion.getFileVersionId() %>"
-							editable="<%= false %>"
-							label="<%= true %>"
-						/>
-					</liferay-ui:panel>
-				</liferay-expando:custom-attributes-available>
-
-				<%
-				try {
-					List<DDMStructure> ddmStructures = DDMStructureManagerUtil.getClassStructures(company.getCompanyId(), PortalUtil.getClassNameId(RawMetadataProcessor.class), DDMStructureManager.STRUCTURE_COMPARATOR_STRUCTURE_KEY);
-
-					for (DDMStructure ddmStructure : ddmStructures) {
-						DDMFormValues ddmFormValues = null;
-
-						try {
-							DLFileEntryMetadata fileEntryMetadata = DLFileEntryMetadataLocalServiceUtil.getFileEntryMetadata(ddmStructure.getStructureId(), fileVersion.getFileVersionId());
-
-							ddmFormValues = dlViewFileVersionDisplayContext.getDDMFormValues(fileEntryMetadata.getDDMStorageId());
-						}
-						catch (Exception e) {
-						}
-
-						if (ddmFormValues != null) {
-							String name = "metadata." + ddmStructure.getStructureKey();
-				%>
-
-							<liferay-ui:panel
-								collapsible="<%= true %>"
-								cssClass="lfr-asset-metadata"
-								defaultState="closed"
-								id='<%= "documentLibraryMetadataPanel" + StringPool.UNDERLINE + ddmStructure.getStructureId() %>'
-								markupView="lexicon"
-								persistState="<%= true %>"
-								title="<%= name %>"
-							>
-								<liferay-ddm:html
-									classNameId="<%= PortalUtil.getClassNameId(com.liferay.dynamic.data.mapping.model.DDMStructure.class) %>"
-									classPK="<%= ddmStructure.getPrimaryKey() %>"
-									ddmFormValues="<%= ddmFormValues %>"
-									fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
-									readOnly="<%= true %>"
-									requestedLocale="<%= ddmFormValues.getDefaultLocale() %>"
-									showEmptyFieldLabel="<%= false %>"
-								/>
-							</liferay-ui:panel>
-
-				<%
-						}
-					}
-				}
-				catch (Exception e) {
-				}
-				%>
-
-			</liferay-ui:panel-container>
 		</div>
 	</liferay-ui:section>
 

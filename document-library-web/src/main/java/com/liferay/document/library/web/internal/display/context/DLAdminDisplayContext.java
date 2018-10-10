@@ -21,12 +21,14 @@ import com.liferay.document.library.kernel.exception.NoSuchFolderException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
+import com.liferay.document.library.kernel.model.DLFileShortcut;
 import com.liferay.document.library.kernel.model.DLFileShortcutConstants;
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileShortcutLocalServiceUtil;
 import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.document.library.kernel.util.comparator.RepositoryModelModifiedDateComparator;
 import com.liferay.document.library.web.internal.constants.DLWebKeys;
@@ -121,7 +123,7 @@ public class DLAdminDisplayContext {
 
 		String[] displayViews = _dlPortletInstanceSettings.getDisplayViews();
 
-		//------------Tiamo------------------
+		//------------Tiamo--------justify Portlet is PRODUCTS_DATA_DISPLAY----------
 		DLRequestHelper dlRequestHelper = new DLRequestHelper(_request);
 		String portletName = dlRequestHelper.getPortletName();
 
@@ -186,7 +188,7 @@ public class DLAdminDisplayContext {
 		if (orderByCol.equals("downloads") && (fileEntryTypeId >= 0)) {
 			orderByCol = "modifiedDate";
 		}
-		//------------Tiamo------------------
+		//------------Tiamo------------justify Portlet is PRODUCTS_DATA_DISPLAY------
 		DLRequestHelper dlRequestHelper = new DLRequestHelper(_request);
 		String portletName = dlRequestHelper.getPortletName();
 
@@ -214,7 +216,7 @@ public class DLAdminDisplayContext {
 
 	public String getOrderByType() {
 		String orderByType = ParamUtil.getString(_request, "orderByType");
-		//------------Tiamo------------------
+		//------------Tiamo------------justify Portlet is PRODUCTS_DATA_DISPLAY------
 		DLRequestHelper dlRequestHelper = new DLRequestHelper(_request);
 		String portletName = dlRequestHelper.getPortletName();
 
@@ -404,7 +406,10 @@ public class DLAdminDisplayContext {
 
 		long categoryId = ParamUtil.getLong(_request, "categoryId");
 		String tagName = ParamUtil.getString(_request, "tag");
-
+		//-----------------------------Tiamo-----------------------------------
+		long[] assetCategoryIds = new long[]{categoryId}; 
+		String[] assetTagNames = new String[]{tagName}; 
+		
 		boolean useAssetEntryQuery = false;
 
 		if ((categoryId > 0) || Validator.isNotNull(tagName)) {
@@ -462,10 +467,13 @@ public class DLAdminDisplayContext {
 
 		List results = new ArrayList();
 		int total = 0;
-
 		if (fileEntryTypeId >= 0) {
 			Indexer indexer = IndexerRegistryUtil.getIndexer(
 				DLFileEntryConstants.getClassName());
+			//-------------Tiamo-------------scopeGroupId 20126 using DLFileShortcut-----------
+			if(getRepositoryId()==20126){
+				indexer = IndexerRegistryUtil.getIndexer(DLFileShortcutConstants.getClassName());
+			}
 
 			if (fileEntryTypeId > 0) {
 				DLFileEntryType dlFileEntryType =
@@ -481,7 +489,14 @@ public class DLAdminDisplayContext {
 
 			searchContext.setAttribute("paginationType", "none");
 			searchContext.setEnd(dlSearchContainer.getEnd());
-
+			//-------------------------------Tiamo-------------------------------
+			if (categoryId!=0) {
+			    searchContext.setAssetCategoryIds(assetCategoryIds);
+			}
+			if (Validator.isNotNull(tagName)) {
+			    searchContext.setAssetTagNames(assetTagNames);
+			}
+			
 			int type = Sort.STRING_TYPE;
 			String fieldName = orderByCol;
 
@@ -512,13 +527,18 @@ public class DLAdminDisplayContext {
 			dlSearchContainer.setTotal(total);
 
 			for (Document doc : hits.getDocs()) {
-				long fileEntryId = GetterUtil.getLong(
-					doc.get(Field.ENTRY_CLASS_PK));
-
+				long fileShortcutId = GetterUtil.getLong(doc.get(Field.ENTRY_CLASS_PK));	//as samelong fileEntryId = GetterUtil.getLong(
+					//doc.get(Field.ENTRY_CLASS_PK));
 				FileEntry fileEntry = null;
-
+				DLFileShortcut fileShortcut = null;
+				long fileEntryId = 0;
 				try {
-					fileEntry = DLAppLocalServiceUtil.getFileEntry(fileEntryId);
+					if(getRepositoryId()==20126){
+						fileShortcut = DLFileShortcutLocalServiceUtil.getFileShortcut(fileShortcutId);
+						fileEntry = DLAppLocalServiceUtil.getFileEntry(fileShortcut.getToFileEntryId());
+					}else{
+						fileEntry = DLAppLocalServiceUtil.getFileEntry(fileShortcutId);
+					}
 				}
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {

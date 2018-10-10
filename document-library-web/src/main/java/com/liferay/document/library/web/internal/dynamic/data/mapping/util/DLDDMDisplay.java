@@ -39,10 +39,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Roberto Díaz
  */
 @Component(
-	property = {
-			"javax.portlet.name=" + DLPortletKeys.DOCUMENT_LIBRARY,
-			"javax.portlet.name=" + DLWebKeys.PRODUCTS_DATA_DISPLAY
-	},
+	property = "javax.portlet.name=" + DLPortletKeys.DOCUMENT_LIBRARY,
 	service = DDMDisplay.class
 )
 public class DLDDMDisplay extends BaseDDMDisplay {
@@ -64,7 +61,6 @@ public class DLDDMDisplay extends BaseDDMDisplay {
 
 	@Override
 	public String getPortletId() {
-		System.out.print("DLDDMDisplay class here maybe need to modify");
 		return PortletKeys.DOCUMENT_LIBRARY;
 	}
 

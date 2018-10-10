@@ -111,7 +111,7 @@
 				<liferay-ui:message arguments="<%= fileEntry.getTitle() %>" key="cannot-generate-preview-for-x" />
 			</div>
 		</c:when>
-		<c:when test="<%= previewFileCount == 0 %>">
+		<c:when test="<%= previewFileCount == 0 && !(uploadProducts || uploadModels) %>">
 			<c:choose>
 				<c:when test="<%= !DLProcessorRegistryUtil.isPreviewableSize(fileVersion) && (AudioProcessorUtil.isAudioSupported(fileVersion.getMimeType()) || ImageProcessorUtil.isImageSupported(fileVersion.getMimeType()) || PDFProcessorUtil.isDocumentSupported(fileVersion.getMimeType()) || VideoProcessorUtil.isVideoSupported(fileVersion.getMimeType())) %>">
 					<div class="alert alert-info">
@@ -134,6 +134,120 @@
 
 					<liferay-util:include page="/document_library/player.jsp" servletContext="<%= application %>" />
 				</c:when>
+				
+				<c:when test="<%= uploadProducts %>">
+					<div id="documentLibraryWrapper">
+						<div id="picSlideWrap" class="clearfix">
+					        <div class="imgnav" id="imgnav">
+					             <div id="img">
+	       						 <%
+									String attachmentFileEntryURL = null;
+									String attachmentSmallImageURL = null;								
+									String fileEntryURL = DLUtil.getImagePreviewURL(fileEntry, fileVersion, themeDisplay);
+									String SmallImageURL = DLUtil.getThumbnailSrc(fileEntry, fileVersion, null, themeDisplay);
+	
+								 %>
+	          					<img src="<%= fileEntryURL %>" class="imgshow" />
+	          					 <%
+									FileEntry attachmentFileEntry = null;
+	          						FileVersion attachmentLatestFileVersion = fileEntry.getFileVersion();
+	          							
+									for(int i = 0; i < attachmentFileEntryIds.length; i++){										
+										attachmentFileEntry = DLAppLocalServiceUtil.getFileEntry(attachmentFileEntryIds[i]);
+										attachmentLatestFileVersion = attachmentFileEntry.getLatestFileVersion();
+										attachmentFileEntryURL = DLUtil.getImagePreviewURL(attachmentFileEntry, attachmentLatestFileVersion, themeDisplay);
+								 %>
+										<img src="<%= attachmentFileEntryURL %>"  onerror="javascript:this.src='<%=request.getContextPath()%>/document_library/images/ico/picSlideLeft.gif' " class="imgshow" />
+								 <%	
+									}
+								 %>
+					                <div id="front" title="Previous"><a href="javaScript:void(0)" class="pngFix"></a></div>
+					                <div id="next" title="next"><a href="javaScript:void(0)" class="pngFix"></a></div>
+					             </div>                         
+					             <div id="cbtn">
+					                <i class="picSildeLeft"><img src="<%=request.getContextPath()%>/document_library/images/ico/picSlideLeft.gif" /></i>
+					                <i class="picSildeRight"><img src="<%=request.getContextPath()%>/document_library/images/ico/picSlideRight.gif" /></i>
+					                <div id="cSlideUl">
+					                    <ul>
+					                        <li><img src="<%= SmallImageURL %>" /></li>
+	            							<%
+												for(int i=0;i<attachmentFileEntryIds.length;i++){
+													attachmentFileEntry = DLAppLocalServiceUtil.getFileEntry(attachmentFileEntryIds[i]);
+													attachmentLatestFileVersion = attachmentFileEntry.getLatestFileVersion();
+													attachmentSmallImageURL = DLUtil.getThumbnailSrc(attachmentFileEntry, attachmentLatestFileVersion, themeDisplay);
+											%>
+													<li><img src="<%= attachmentSmallImageURL %>" onerror="javascript:this.src='<%=request.getContextPath()%>/document_library/images/ico/picSlideLeft.gif' " /></li>
+											<%	
+												}
+											%>
+					                    </ul>
+					                </div>
+					             </div>       
+					        </div>
+					    </div>
+					</div>
+	             </c:when>
+                            	
+                 <c:when test="<%= uploadModels %>">							
+					<ul class="nav nav-underline" role="tablist">
+						<li class="nav-item">
+							<a aria-controls="navUnderlineFields" aria-expanded="true" class="active nav-link" data-toggle="tab" href="#navUnderlineFields" id="navUnderlineFieldsTab" role="tab"><%= LanguageUtil.get(request, "display-images")%></a>
+						</li>
+						<li class="nav-item">
+							<a aria-controls="navUnderlineSettings" class="nav-link" data-toggle="tab" href="#navUnderlineSettings" id="navUnderlineSettingsTab" role="tab"><%=LanguageUtil.get(request, "3D-models")%></a>
+						</li>
+					</ul>
+					<p>
+					<div class="tab-content">
+						<div aria-labelledby="navUnderlineFieldsTab" class="active fade show tab-pane" id="navUnderlineFields" role="tabpanel">
+							<div id="documentLibraryWrapper">
+								<div id="picSlideWrap" class="clearfix">
+							        <div class="imgnav" id="imgnav">
+							             <div id="img">
+          								<%
+											String attachmentFileEntryURL = null;
+											String attachmentSmallImageURL = null;							
+											FileVersion attachmentLatestFileVersion = fileEntry.getFileVersion();
+											FileEntry attachmentFileEntry = null;
+											for(int i=0;i<attachmentFileEntryIds.length;i++){												
+												attachmentFileEntry = DLAppLocalServiceUtil.getFileEntry(attachmentFileEntryIds[i]);
+												attachmentLatestFileVersion = attachmentFileEntry.getLatestFileVersion();
+												attachmentFileEntryURL = DLUtil.getImagePreviewURL(attachmentFileEntry, attachmentLatestFileVersion, themeDisplay);
+										 %>
+											<img src="<%= attachmentFileEntryURL %>" onerror="javascript:this.src='<%=request.getContextPath()%>/document_library/images/ico/picSlideLeft.gif' " class="imgshow" />
+										 <%	
+											}
+										 %>
+							                <div id="front" title="Previous"><a href="javaScript:void(0)" class="pngFix"></a></div>
+							                <div id="next" title="next"><a href="javaScript:void(0)" class="pngFix"></a></div>
+							             </div>                         
+							             <div id="cbtn">
+							                <i class="picSildeLeft"><img src="<%=request.getContextPath()%>/document_library/images/ico/picSlideLeft.gif" /></i>
+							                <i class="picSildeRight"><img src="<%=request.getContextPath()%>/document_library/images/ico/picSlideRight.gif" /></i>
+							                <div id="cSlideUl">
+							                    <ul>
+               										<%
+														for(int i=0;i<attachmentFileEntryIds.length;i++){
+															attachmentFileEntry = DLAppLocalServiceUtil.getFileEntry(attachmentFileEntryIds[i]);
+															attachmentLatestFileVersion = attachmentFileEntry.getLatestFileVersion();
+															attachmentSmallImageURL = DLUtil.getThumbnailSrc(attachmentFileEntry, attachmentLatestFileVersion, themeDisplay);													
+													%>
+															<li><img src="<%= attachmentSmallImageURL %>" onerror="javascript:this.src='<%=request.getContextPath()%>/document_library/images/ico/picSlideLeft.gif' "/></li>
+													<%	
+														}
+													%>
+							                    </ul>
+							                </div>
+							             </div>       
+							        </div>
+							    </div>
+							</div>
+						</div>
+						<div aria-labelledby="navUnderlineSettingsTab" class="fade tab-pane" id="navUnderlineSettings" role="tabpanel">
+							</iframe><iframe allowfullscreen="true" frameborder="0" height="480" mozallowfullscreen="true" src="https://myhub.autodesk360.com/ue2b45b07/shares/public/SHabee1QT1a327cf2b7a8af27d8c985c9f10?mode=embed" webkitallowfullscreen="true" width="100%"></iframe>
+						</div>
+					</div>						   
+                </c:when>						
 				<c:when test="<%= hasImages %>">
 					<c:choose>
 						<c:when test="<%= showImageContainer %>">
@@ -213,4 +327,77 @@
 	if (currentImage && (currentImage.get('complete') || currentImage.get('naturalWidth'))) {
 		currentImage.setStyle('background-image', 'none');
 	}
+</aui:script>
+
+<aui:script>
+$(document).ready(function(){                         
+    var index=0;
+    var length=$("#img img").length;
+    var i=1;
+   
+    //关键函数：通过控制i ，来显示图片
+    function showImg(i){
+        $("#img img")
+            .eq(i).stop(true,true).fadeIn(100)
+            .siblings("img").hide();
+         $("#cbtn li")
+            .eq(i).addClass("hov")
+            .siblings().removeClass("hov");
+    }
+   
+    function slideNext(){
+        if(index >= 0 && index < length-1) {
+             ++index;
+             showImg(index);
+        }
+        if(i<0 || i>length-5) {return false;}						 
+               $("#cSlideUl ul").animate({ "left": "-=142px" },200)
+               i++;
+    }
+     
+    function slideFront(){
+       if(index >= 1 ) {
+             --index;
+             showImg(index);
+        }
+        if(i<2 || i>length+5) {return false;}
+               $("#cSlideUl ul").animate({ "left": "+=142px" },200)
+               i--;
+    }	
+        $("#img img").eq(0).show();
+        $("#cbtn li").eq(0).addClass("hov");
+        $("#cbtn tt").each(function(e){
+            var str=(e+1)+""+length;
+            $(this).html(str)
+        })
+   
+        $(".picSildeRight,#next").click(function(){
+               slideNext();
+           })
+        $(".picSildeLeft,#front").click(function(){
+               slideFront();
+           })
+        $("#cbtn li").click(function(){
+            index  =  $("#cbtn li").index(this);
+            showImg(index);
+        });	
+		$("#next,#front").hover(function(){
+			$(this).children("a").fadeIn();
+		},function(){
+			$(this).children("a").fadeOut();
+		})
+    })	
+</aui:script>
+<!-- 删除后续代码报错Uncaught TypeError: $(...).ready(...) is not a function ----JS 不能正常使用，所以保留后面的代码，此代码无用 上面代码有错误，暂运行-->
+<aui:script>
+YUI().use(
+  'aui-tabview',
+  function(Y) {
+    new Y.TabView(
+      {
+        srcNode: '#myTab'
+      }
+    ).render();
+  }
+);
 </aui:script>
