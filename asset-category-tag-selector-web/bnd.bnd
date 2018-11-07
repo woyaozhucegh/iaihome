@@ -1,0 +1,4 @@
+Bundle-Name: asset-category-tag-selector-web
+Bundle-SymbolicName: com.liferay.asset.assetcategorytagselector
+Bundle-Version: 1.0.0
+Export-Package: com.liferay.asset.assetcategorytagselector.constants
