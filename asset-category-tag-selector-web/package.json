@@ -10,11 +10,11 @@
 		"liferay-module-config-generator": "^1.2.1",
 		"metal-cli": "^4.2.0"
 	},
-	"name": "asset-categories-selector-web",
+	"name": "asset-category-tag-selector-web",
 	"scripts": {
 		"checkFormat": "npm run csf",
 		"csf": "csf src/**/*.js",
 		"format": "npm run csf -- -i"
 	},
-	"version": "1.0.3"
+	"version": "1.0.0"
 }

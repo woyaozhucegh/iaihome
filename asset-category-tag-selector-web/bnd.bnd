@@ -2,3 +2,13 @@ Bundle-Name: asset-category-tag-selector-web
 Bundle-SymbolicName: com.liferay.asset.assetcategorytagselector
 Bundle-Version: 1.0.0
 Export-Package: com.liferay.asset.assetcategorytagselector.constants
+Include-Resource: package.json
+Require-Capability: soy;filter:="(type=metal)"
+Provide-Capability:\
+	soy;\
+		type="asset-category-tag-selector-web";\
+		version:Version="${Bundle-Version}"
+Require-Capability:\
+	osgi.extender;\
+		filter:="(&(osgi.extender=jsp.taglib)(uri=http://liferay.com/tld/soy))"
+Web-ContextPath: /asset-category-tag-selector-web

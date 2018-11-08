@@ -5,6 +5,6 @@ package com.liferay.asset.assetcategorytagselector.constants;
  */
 public class AssetCategoryTagSelectorWebPortletKeys {
 
-	public static final String AssetCategoryTagSelectorWeb = "assetcategorytagselectorweb";
+	public static final String ASSET_CATEGORY_TAG_SELECTOR_WEB = "assetcategorytagselectorweb";
 
 }
