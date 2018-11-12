@@ -33,14 +33,14 @@ import org.osgi.service.component.annotations.Reference;
 	immediate = true,
 	property = {
 		"com.liferay.portlet.add-default-resource=true",
-		"com.liferay.portlet.display-category=category.sample",
-		"com.liferay.portlet.instanceable=true",
 		"com.liferay.portlet.css-class-wrapper=portlet-asset-category-tag-selector",
+		"com.liferay.portlet.display-category=category.cms",
+		"com.liferay.portlet.display-category=category.highlighted",
 		"com.liferay.portlet.header-portlet-css=/css/tree.css",
+		"com.liferay.portlet.instanceable=true",
 		"com.liferay.portlet.private-request-attributes=false",
 		"com.liferay.portlet.private-session-attributes=false",
 		"com.liferay.portlet.render-weight=50",
-		"com.liferay.portlet.system=true",
 		"com.liferay.portlet.use-default-template=true",
 		"javax.portlet.display-name=Asset Category tag Selector",
 		"javax.portlet.init-param.template-path=/",
@@ -73,7 +73,7 @@ public class AssetCategoryTagSelectorWebPortlet extends MVCPortlet {
 					List<AssetCategory> childCategories =
 						_assetCategoryService.getChildCategories(
 							category.getCategoryId());
-
+					System.out.println("ffffffffff"+category.getCategoryId());
 					jsonObject.put("categoryId", category.getCategoryId());
 					jsonObject.put("childrenCount", childCategories.size());
 					jsonObject.put("hasChildren", !childCategories.isEmpty());
@@ -100,9 +100,10 @@ public class AssetCategoryTagSelectorWebPortlet extends MVCPortlet {
 
 	protected List<AssetCategory> getCategories(PortletRequest portletRequest)
 		throws PortalException {
-
+		
 		long categoryId = ParamUtil.getLong(portletRequest, "categoryId");
 		long vocabularyId = ParamUtil.getLong(portletRequest, "vocabularyId");
+		System.out.println("ddddddddddddddddd"+vocabularyId+"cccc"+categoryId);
 		int start = ParamUtil.getInteger(
 			portletRequest, "start", QueryUtil.ALL_POS);
 		int end = ParamUtil.getInteger(
@@ -128,7 +129,7 @@ public class AssetCategoryTagSelectorWebPortlet extends MVCPortlet {
 	@Reference(unbind = "-")
 	protected void setAssetCategoryService(
 		AssetCategoryService assetCategoryService) {
-
+System.out.println("111111111111111111");
 		_assetCategoryService = assetCategoryService;
 	}
 

@@ -69,7 +69,7 @@ public class AssetCategoryTagSelectorDisplayContext {
 	public JSONArray getCategoriesJSONArray() throws Exception {
 		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
 			WebKeys.THEME_DISPLAY);
-
+System.out.println("000000000000");
 		JSONArray jsonArray = _getCategoriesJSONArray();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
@@ -95,7 +95,7 @@ public class AssetCategoryTagSelectorDisplayContext {
 		}
 
 		_categoryId = ParamUtil.getLong(_request, "categoryId");
-
+System.out.println("22222222222222222222222"+_categoryId);
 		return _categoryId;
 	}
 
@@ -118,7 +118,7 @@ public class AssetCategoryTagSelectorDisplayContext {
 
 		_selectedCategories = ParamUtil.getString(
 			_request, "selectedCategories");
-
+		System.out.println("3333333333"+_selectedCategories);
 		return _selectedCategories;
 	}
 
@@ -149,7 +149,7 @@ public class AssetCategoryTagSelectorDisplayContext {
 
 		_vocabularyIds = StringUtil.split(
 			ParamUtil.getString(_request, "vocabularyIds"), 0L);
-
+		System.out.println("444444444444"+_vocabularyIds);
 		return _vocabularyIds;
 	}
 
@@ -190,7 +190,7 @@ public class AssetCategoryTagSelectorDisplayContext {
 
 		_allowedSelectVocabularies = ParamUtil.getBoolean(
 			_request, "allowedSelectVocabularies");
-
+		System.out.println("55555555555"+_allowedSelectVocabularies);
 		return _allowedSelectVocabularies;
 	}
 

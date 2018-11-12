@@ -2,20 +2,21 @@
 // Please don't edit this file by hand.
 
 /**
- * @fileoverview Templates in namespace com.liferay.asset.categories.selector.web.SelectCategory.
+ * @fileoverview Templates in namespace com.liferay.asset.category.tag.selector.web.SelectCategory.
  * @public
  */
 
 if (typeof com == 'undefined') { var com = {}; }
 if (typeof com.liferay == 'undefined') { com.liferay = {}; }
 if (typeof com.liferay.asset == 'undefined') { com.liferay.asset = {}; }
-if (typeof com.liferay.asset.categories == 'undefined') { com.liferay.asset.categories = {}; }
-if (typeof com.liferay.asset.categories.selector == 'undefined') { com.liferay.asset.categories.selector = {}; }
-if (typeof com.liferay.asset.categories.selector.web == 'undefined') { com.liferay.asset.categories.selector.web = {}; }
-if (typeof com.liferay.asset.categories.selector.web.SelectCategory == 'undefined') { com.liferay.asset.categories.selector.web.SelectCategory = {}; }
+if (typeof com.liferay.asset.category == 'undefined') { com.liferay.asset.category = {}; }
+if (typeof com.liferay.asset.category.tag == 'undefined') { com.liferay.asset.category.tag = {}; }
+if (typeof com.liferay.asset.category.tag.selector == 'undefined') { com.liferay.asset.category.tag.selector = {}; }
+if (typeof com.liferay.asset.category.tag.selector.web == 'undefined') { com.liferay.asset.category.tag.selector.web = {}; }
+if (typeof com.liferay.asset.category.tag.selector.web.SelectCategory == 'undefined') { com.liferay.asset.category.tag.selector.web.SelectCategory = {}; }
 
 
-com.liferay.asset.categories.selector.web.SelectCategory.render = function(opt_data, opt_ignored) {
+com.liferay.asset.category.tag.selector.web.SelectCategory.render = function(opt_data, opt_ignored) {
   goog.asserts.assert(goog.isBoolean(opt_data.multiSelection) || opt_data.multiSelection === 1 || opt_data.multiSelection === 0, "expected param 'multiSelection' of type boolean.");
   var multiSelection = /** @type {boolean} */ (!!opt_data.multiSelection);
   var nodes = goog.asserts.assertArray(opt_data.nodes, "expected parameter 'nodes' of type list<unknown>.");
@@ -30,5 +31,5 @@ com.liferay.asset.categories.selector.web.SelectCategory.render = function(opt_d
   return soydata.VERY_UNSAFE.ordainSanitizedHtml('<div class="select-category"><nav class="management-bar navbar navbar-light"><div class="navbar-form navbar-form-autofit"><div class="container-fluid"><form role="search"><div class="input-group input-group-inset"><div class="input-group-input"><input class="form-control" data-oninput="searchNodes_" name="' + soy.$$escapeHtmlAttribute(namespace) + 'filterKeywords" placeholder="search" type="text"></div><span class="input-group-inset-item"><button class="btn btn-unstyled" type="button"><svg class="lexicon-icon"><use xlink:href="' + soy.$$escapeHtmlAttribute(soy.$$filterNormalizeUri(pathThemeImages)) + '/lexicon/icons.svg#search"></use></svg></button></span></div></form></div></div></nav><form class="container-fluid-1280" name="' + soy.$$escapeHtmlAttribute(namespace) + 'selectCategoryFm"><fieldset class="panel-body"><div class="category-tree" id="' + soy.$$escapeHtmlAttribute(namespace) + 'categoryContainer">' + soy.$$escapeHtml(liferay.frontend.CardsTreeview.render({events: {selectedNodesChanged: selectedNodeChange_}, multiSelection: multiSelection, nodes: nodes, pathThemeImages: pathThemeImages, viewType: viewType})) + '</div></fieldset></form></div>');
 };
 if (goog.DEBUG) {
-  com.liferay.asset.categories.selector.web.SelectCategory.render.soyTemplateName = 'com.liferay.asset.categories.selector.web.SelectCategory.render';
+  com.liferay.asset.category.tag.selector.web.SelectCategory.render.soyTemplateName = 'com.liferay.asset.category.tag.selector.web.SelectCategory.render';
 }

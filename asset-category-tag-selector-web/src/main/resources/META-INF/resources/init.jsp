@@ -20,7 +20,7 @@
 taglib uri="http://liferay.com/tld/soy" prefix="soy" %><%@
 taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %>
 
-<%@ page import="com.liferay.asset.categories.selector.web.display.context.AssetCategoriesSelectorDisplayContext" %><%@
+<%@ page import="com.liferay.asset.assetcategorytagselector.display.context.AssetCategoryTagSelectorDisplayContext" %><%@
 page import="com.liferay.portal.kernel.util.HtmlUtil" %>
 
 <%@ page import="java.util.HashMap" %><%@
@@ -33,7 +33,7 @@ page import="java.util.Map" %>
 <portlet:defineObjects />
 
 <%
-AssetCategoriesSelectorDisplayContext assetCategoriesSelectorDisplayContext = new AssetCategoriesSelectorDisplayContext(renderRequest, renderResponse, request);
+AssetCategoryTagSelectorDisplayContext assetCategoriesSelectorDisplayContext = new AssetCategoryTagSelectorDisplayContext(renderRequest, renderResponse, request);
 %>
 
 <%@ include file="/init-ext.jsp" %>
