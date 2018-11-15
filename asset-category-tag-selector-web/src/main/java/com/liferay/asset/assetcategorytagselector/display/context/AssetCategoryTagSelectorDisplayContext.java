@@ -20,6 +20,7 @@ import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetCategoryServiceUtil;
 import com.liferay.asset.kernel.service.AssetTagServiceUtil;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalServiceUtil;
+import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.asset.assetcategorytagselector.search.EntriesChecker;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
@@ -36,6 +37,7 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -69,7 +71,7 @@ public class AssetCategoryTagSelectorDisplayContext {
 	public JSONArray getCategoriesJSONArray() throws Exception {
 		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
 			WebKeys.THEME_DISPLAY);
-System.out.println("000000000000");
+
 		JSONArray jsonArray = _getCategoriesJSONArray();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
@@ -142,14 +144,29 @@ System.out.println("22222222222222222222222"+_categoryId);
 		return _type;
 	}
 
-	public long[] getVocabularyIds() {
+	//---------------by Tiamo-----------------------
+	
+	public String getVocabularyIdsString() throws Exception {
+		List<AssetVocabulary> vocabularies =
+			AssetVocabularyServiceUtil.getGroupsVocabularies(_getGroupIds());
+
+		return ListUtil.toString(
+			vocabularies, AssetVocabulary.VOCABULARY_ID_ACCESSOR);
+	}
+	
+	//--------------------------------------------------
+	
+	public long[] getVocabularyIds() throws Exception {
 		if (_vocabularyIds != null) {
 			return _vocabularyIds;
 		}
 
 		_vocabularyIds = StringUtil.split(
-			ParamUtil.getString(_request, "vocabularyIds"), 0L);
-		System.out.println("444444444444"+_vocabularyIds);
+				getVocabularyIdsString(), 0L);
+		for (int i=0;i<_vocabularyIds.length;i++) {
+			System.out.println("444444444444"+_vocabularyIds[i]);
+		}
+
 		return _vocabularyIds;
 	}
 
@@ -206,7 +223,7 @@ System.out.println("22222222222222222222222"+_categoryId);
 
 	private JSONArray _getCategoriesJSONArray() throws Exception {
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
+		System.out.println("000222");
 		boolean allowedSelectVocabularies = ParamUtil.getBoolean(
 			_request, "allowedSelectVocabularies");
 
@@ -220,7 +237,7 @@ System.out.println("22222222222222222222222"+_categoryId);
 			jsonObject.put("id", vocabularyId);
 			jsonObject.put("name", getVocabularyTitle(vocabularyId));
 			jsonObject.put("vocabulary", true);
-
+			System.out.println("77777777777777"+vocabularyId);
 			jsonArray.put(jsonObject);
 		}
 
@@ -250,7 +267,7 @@ System.out.println("22222222222222222222222"+_categoryId);
 			if (children.length() > 0) {
 				jsonObject.put("children", children);
 			}
-
+System.out.println("ccccccccccccccccccccccccccc"+category.getCategoryId());
 			jsonObject.put("icon", "page");
 			jsonObject.put("id", category.getCategoryId());
 			jsonObject.put("name", category.getTitle(themeDisplay.getLocale()));
@@ -452,7 +469,8 @@ System.out.println("22222222222222222222222"+_categoryId);
 			ParamUtil.getString(_request, "groupIds"), 0L);
 
 		if (ArrayUtil.isEmpty(_groupIds)) {
-			_groupIds = new long[] {themeDisplay.getScopeGroupId()};
+			//add themeDisplay.getCompanyGroupId() by Tiamo
+			_groupIds = new long[] {themeDisplay.getScopeGroupId(),themeDisplay.getCompanyGroupId()};
 		}
 
 		return _groupIds;
