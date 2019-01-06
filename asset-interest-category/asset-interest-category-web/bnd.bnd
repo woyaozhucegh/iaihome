@@ -1,0 +1,17 @@
+Bundle-Name: asset-category-tag-selector-web
+Bundle-SymbolicName: com.liferay.asset.assetcategorytagselector
+Bundle-Version: 1.0.0
+Liferay-JS-Config: /META-INF/resources/js/config.js
+Provide-Capability:\
+	soy;\
+		type="asset-category-tag-selector-web";\
+		version:Version="${Bundle-Version}",\
+	osgi.extender;\
+		osgi.extender="jsp.taglib";\
+		uri="http://liferay.com/tld/asset";\
+		version:Version="${Bundle-Version}"
+Require-Capability:\
+	osgi.extender;\
+		filter:="(&(osgi.extender=jsp.taglib)(uri=http://liferay.com/tld/soy))"
+Web-ContextPath: /asset-category-tag-selector-web
+Include-Resource: package.json

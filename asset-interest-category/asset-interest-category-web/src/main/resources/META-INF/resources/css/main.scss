@@ -1,0 +1,110 @@
+@import "bourbon";
+@import "mixins";
+
+.portlet-asset-category-tag-selector {
+	.category-tree .treeview-nodes {
+		border-left: 1px #869CAD;
+	    margin-left: 10px; 
+	}
+	.category-tree .treeview-node-main {
+	    margin-bottom: 10px; 
+	    padding-left: 10px; 
+	}
+	.category-tree .treeview-node-name {
+	    font-size: 0.8rem;
+	    margin-left: 0.8rem;
+	}
+	.panel-body {
+	    padding: 0rem 0rem;
+	}
+	.category-tree .treeview-node-toggler {
+	    background-color: #1da1f2;
+	    opacity: 0.8; 
+	}
+	.category-tree .disabled {
+	    opacity: 1; 
+	    color: #1da1f2;
+	} 
+	.lfr-card-title-text text-default treeview-node-name truncate-text {
+	   opacity: 0.7; 
+	}   
+	.SignupCallOut-title {
+	    color: #14171a;
+	    font-size: 21px;
+	    font-weight: bold;
+	    line-height: 28px;
+	    margin-bottom: 5px;
+	}
+	
+	.u-textBreak {
+	    word-wrap: break-word!important;
+	}
+	.SignupCallOut-subheader {
+	    color: #657786;
+	    font-size: 0.875rem;
+	}
+	.EdgeButton, .EdgeButton:visited {
+	    border-radius: 100px;
+	    box-shadow: none;
+	    cursor: pointer;
+	    font-size: 14px;
+	    font-weight: bold;
+	    line-height: 20px;
+	    padding: 6px 16px;
+	    position: relative;
+	    text-align: center;
+	    white-space: nowrap;
+	}
+	
+	.SignupForm-submit {
+	    margin-top: 12px;
+	    margin-bottom: 12px;
+	}
+	.EdgeButton--primary {
+	    background-color: #1da1f2;
+	    border: 1px solid #1da1f2;
+	    color: #fff;
+	}
+	.EdgeButton--large {
+	    font-size: 18px;
+	    line-height: 24px;
+	    padding: 12px 20px;
+	}
+	.u-block {
+	    display: block!important;
+	}
+	.form-control {
+	    border-bottom-right-radius: 0;
+	    border-top-right-radius: 0;
+	}
+	.SignupCallOut {
+	    background-color: #fff;
+	    border: 1px solid #e6ecf0;
+	    padding: 15px;
+	}
+	.module {
+	    background-clip: padding-box;
+	    border: 0;
+	    position: relative;
+	    margin-bottom: 10px;
+	}
+	.background-text {
+	    position: absolute;
+	    top: 50%;
+	    left: 0;
+	    z-index: 1;
+	    width: 100%;
+	    -webkit-transform: translateY(-50%);
+	    transform: translateY(-50%);
+	    text-align: center;
+	    font-size: 60px;
+	}
+	.background-buttons {
+	    position: absolute;
+	    top: 0;
+	    left: 10px;
+	    z-index: 3;
+	}
+}
+
+

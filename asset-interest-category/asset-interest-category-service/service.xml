@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.0.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_0_0.dtd">
+
+<service-builder package-path="com.liferay.asset.interest">
+	<namespace>IAIHOME</namespace>
+	
+	<entity local-service="true" name="Interestcategory" remote-service="true" uuid="true">
+
+		<!-- PK fields -->
+
+		<column name="interestCategoryId" primary="true" type="long" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="userId" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="U_G" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="groupId" />
+		</finder>
+
+		<!-- References -->
+
+		<reference entity="AssetEntry" package-path="com.liferay.portlet.asset" />
+		<reference entity="AssetTag" package-path="com.liferay.portlet.asset" />
+	</entity>
+</service-builder>

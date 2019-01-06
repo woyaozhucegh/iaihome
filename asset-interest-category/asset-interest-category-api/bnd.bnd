@@ -1,0 +1,9 @@
+Bundle-Name: asset-interest-category-api
+Bundle-SymbolicName: com.liferay.asset.interest.api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.liferay.asset.interest.exception,\
+	com.liferay.asset.interest.model,\
+	com.liferay.asset.interest.service,\
+	com.liferay.asset.interest.service.persistence
+-includeresource: META-INF/service.xml=../asset-interest-category-service/service.xml
